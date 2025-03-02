@@ -1,5 +1,4 @@
-/**
- * AI Product Extractor - Enhanced Configuration Module
+/** AI Product Extractor - Enhanced Configuration Module
  * Version: 3.1.0
  */
 
