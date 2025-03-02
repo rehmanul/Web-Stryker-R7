@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 16px;
+    }
+    
+    h2 {
+      color: #1976d2;
+      margin-top: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    input:focus {
+      border-color: #1976d2;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1565c0;
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .helper-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .error-message {
+      color: #f44336;
+      font-size: 14px;
+      margin-top: 16px;
+      padding: 8px;
+      background: rgba(244, 67, 54, 0.1);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .success-message {
+      color: #4caf50;
+      font-size: 14px;
+      margin-top: 16px;
+      padding: 8px;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Extraction Settings</h2>
+  <p>Configure settings for the extraction process.</p>
+  
+  <form id="settingsForm">
+    <div class="form-group">
+      <label for="batchSize">Batch Size</label>
+      <input type="number" id="batchSize" name="batchSize" min="1" max="20" value="<?= batchSize ?>" required>
+      <div class="helper-text">Number of URLs to process in each batch (1-20)</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="maxRetries">Maximum Retries</label>
+      <input type="number" id="maxRetries" name="maxRetries" min="1" max="10" value="<?= maxRetries ?>" required>
+      <div class="helper-text">Maximum number of retry attempts for failed requests (1-10)</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="retryDelay">Retry Delay (milliseconds)</label>
+      <input type="number" id="retryDelay" name="retryDelay" min="500" step="500" value="<?= retryDelay ?>" required>
+      <div class="helper-text">Delay between retry attempts in milliseconds (min 500ms)</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="cacheDuration">Cache Duration (seconds)</label>
+      <input type="number" id="cacheDuration" name="cacheDuration" min="60" step="60" value="<?= cacheDuration ?>" required>
+      <div class="helper-text">Duration to cache results in seconds (min 60s)</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="requestTimeout">Request Timeout (milliseconds)</label>
+      <input type="number" id="requestTimeout" name="requestTimeout" min="5000" step="1000" value="<?= requestTimeout ?>" required>
+      <div class="helper-text">Timeout for URL requests in milliseconds (min 5000ms)</div>
+    </div>
+    
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+    
+    <div class="controls">
+      <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </div>
+  </form>
+  
+  <script>
+    // Handle form submission
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Clear any previous messages
+      hideMessages();
+      
+      // Gather form values
+      const settings = {
+        batchSize: parseInt(document.getElementById('batchSize').value),
+        maxRetries: parseInt(document.getElementById('maxRetries').value),
+        retryDelay: parseInt(document.getElementById('retryDelay').value),
+        cacheDuration: parseInt(document.getElementById('cacheDuration').value),
+        requestTimeout: parseInt(document.getElementById('requestTimeout').value)
+      };
+      
+      // Basic validation
+      if (!validateForm(settings)) {
+        return;
+      }
+      
+      // Submit to server
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .updateSettings(settings);
+    });
+    
+    // Handle cancellation
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      google.script.host.close();
+    });
+    
+    // Validate form
+    function validateForm(settings) {
+      if (settings.batchSize < 1 || settings.batchSize > 20) {
+        showError('Batch size must be between 1 and 20');
+        return false;
+      }
+      
+      if (settings.maxRetries < 1 || settings.maxRetries > 10) {
+        showError('Maximum retries must be between 1 and 10');
+        return false;
+      }
+      
+      if (settings.retryDelay < 500) {
+        showError('Retry delay must be at least 500 milliseconds');
+        return false;
+      }
+      
+      if (settings.cacheDuration < 60) {
+        showError('Cache duration must be at least 60 seconds');
+        return false;
+      }
+      
+      if (settings.requestTimeout < 5000) {
+        showError('Request timeout must be at least 5000 milliseconds');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Handle successful submission
+    function onSuccess(result) {
+      if (result.success) {
+        showSuccess(result.message || 'Settings updated successfully!');
+        
+        // Close the dialog after a short delay
+        setTimeout(function() {
+          google.script.host.close();
+        }, 2000);
+      } else {
+        showError(result.message || 'Failed to update settings');
+      }
+    }
+    
+    // Handle submission failure
+    function onFailure(error) {
+      showError(error.message || 'An error occurred while updating settings');
+    }
+    
+    // Show error message
+    function showError(message) {
+      const errorElement = document.getElementById('errorMessage');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+    
+    // Show success message
+    function showSuccess(message) {
+      const successElement = document.getElementById('successMessage');
+      successElement.textContent = message;
+      successElement.style.display = 'block';
+    }
+    
+    // Hide all messages
+    function hideMessages() {
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

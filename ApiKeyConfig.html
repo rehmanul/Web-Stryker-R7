@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 16px;
+    }
+    
+    h2 {
+      color: #1976d2;
+      margin-top: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    input:focus {
+      border-color: #1976d2;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1565c0;
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .helper-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .error-message {
+      color: #f44336;
+      font-size: 14px;
+      margin-top: 16px;
+      padding: 8px;
+      background: rgba(244, 67, 54, 0.1);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .success-message {
+      color: #4caf50;
+      font-size: 14px;
+      margin-top: 16px;
+      padding: 8px;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>API Key Configuration</h2>
+  <p>Configure your API keys for external services.</p>
+  
+  <form id="apiKeyForm">
+    <div class="form-group">
+      <label for="bingKey">Azure Bing Search API Key</label>
+      <input type="password" id="bingKey" name="AZURE_BING_KEY" value="<?= bingKey ?>" required>
+      <div class="helper-text">Required for search functionality and alternate URL discovery</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="openaiEndpoint">Azure OpenAI Endpoint</label>
+      <input type="text" id="openaiEndpoint" name="AZURE_OPENAI_ENDPOINT" value="<?= openaiEndpoint ?>" placeholder="https://your-resource.openai.azure.com/" required>
+      <div class="helper-text">Format: https://your-resource.openai.azure.com/</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="openaiKey">Azure OpenAI API Key</label>
+      <input type="password" id="openaiKey" name="AZURE_OPENAI_KEY" value="<?= openaiKey ?>" required>
+      <div class="helper-text">Required for AI-based data extraction and classification</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="kgApiKey">Google Knowledge Graph API Key (Optional)</label>
+      <input type="password" id="kgApiKey" name="KNOWLEDGE_GRAPH_API_KEY" value="<?= kgApiKey ?>">
+      <div class="helper-text">Optional: Enhances product classification with structured data</div>
+    </div>
+    
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+    
+    <div class="controls">
+      <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save API Keys</button>
+    </div>
+  </form>
+  
+  <script>
+    // Handle form submission
+    document.getElementById('apiKeyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Clear any previous messages
+      hideMessages();
+      
+      // Gather form values
+      const keys = {
+        AZURE_BING_KEY: document.getElementById('bingKey').value,
+        AZURE_OPENAI_ENDPOINT: document.getElementById('openaiEndpoint').value,
+        AZURE_OPENAI_KEY: document.getElementById('openaiKey').value,
+        KNOWLEDGE_GRAPH_API_KEY: document.getElementById('kgApiKey').value
+      };
+      
+      // Basic validation
+      if (!validateForm(keys)) {
+        return;
+      }
+      
+      // Submit to server
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .updateApiKeys(keys);
+    });
+    
+    // Handle cancellation
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      google.script.host.close();
+    });
+    
+    // Validate form
+    function validateForm(keys) {
+      if (!keys.AZURE_BING_KEY) {
+        showError('Bing Search API Key is required');
+        return false;
+      }
+      
+      if (!keys.AZURE_OPENAI_ENDPOINT) {
+        showError('Azure OpenAI Endpoint is required');
+        return false;
+      }
+      
+      if (!/^https:\/\/[a-zA-Z0-9-]+\.openai\.azure\.com\/?$/.test(keys.AZURE_OPENAI_ENDPOINT)) {
+        showError('Azure OpenAI Endpoint format is invalid. Should be: https://your-resource.openai.azure.com/');
+        return false;
+      }
+      
+      if (!keys.AZURE_OPENAI_KEY) {
+        showError('Azure OpenAI API Key is required');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Handle successful submission
+    function onSuccess(result) {
+      if (result.success) {
+        showSuccess(result.message || 'API keys updated successfully!');
+        
+        // Close the dialog after a short delay
+        setTimeout(function() {
+          google.script.host.close();
+        }, 2000);
+      } else {
+        showError(result.message || 'Failed to update API keys');
+        
+        // Show specific errors if available
+        if (result.errors && result.errors.length > 0) {
+          const errorDetails = document.createElement('ul');
+          result.errors.forEach(function(error) {
+            const li = document.createElement('li');
+            li.textContent = error;
+            errorDetails.appendChild(li);
+          });
+          document.getElementById('errorMessage').appendChild(errorDetails);
+        }
+      }
+    }
+    
+    // Handle submission failure
+    function onFailure(error) {
+      showError(error.message || 'An error occurred while updating API keys');
+    }
+    
+    // Show error message
+    function showError(message) {
+      const errorElement = document.getElementById('errorMessage');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+    
+    // Show success message
+    function showSuccess(message) {
+      const successElement = document.getElementById('successMessage');
+      successElement.textContent = message;
+      successElement.style.display = 'block';
+    }
+    
+    // Hide all messages
+    function hideMessages() {
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
