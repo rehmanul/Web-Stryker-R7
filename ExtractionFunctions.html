@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    .extraction-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #1976d2;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .action-button:hover {
+      background: #1565c0;
+    }
+    
+    .action-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .action-button i {
+      font-size: 16px;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="extraction-actions">
+    <button id="startExtraction" class="action-button">
+      <i class="fas fa-play"></i> Start Extraction
+    </button>
+    
+    <button id="pauseProcessing" class="action-button">
+      <i class="fas fa-pause"></i> Pause Processing
+    </button>
+    
+    <button id="resumeProcessing" class="action-button">
+      <i class="fas fa-play"></i> Resume Processing
+    </button>
+    
+    <button id="stopProcessing" class="action-button">
+      <i class="fas fa-stop"></i> Stop Processing
+    </button>
+    
+    <button id="resetProcessing" class="action-button">
+      <i class="fas fa-undo"></i> Reset Progress
+    </button>
+    
+    <button id="configureApiKeys" class="action-button">
+      <i class="fas fa-key"></i> Configure API Keys
+    </button>
+    
+    <button id="showLogs" class="action-button">
+      <i class="fas fa-file-alt"></i> Show Logs
+    </button>
+    
+    <button id="openDashboard" class="action-button">
+      <i class="fas fa-tachometer-alt"></i> Open Dashboard
+    </button>
+    
+    <button id="dataCenter" class="action-button">
+      <i class="fas fa-database"></i> Data Center
+    </button>
+  </div>
+
+  <script>
+    // Initialize buttons
+    document.addEventListener('DOMContentLoaded', function() {
+      // Start extraction
+      document.getElementById('startExtraction').addEventListener('click', function() {
+        this.disabled = true;
+        showLoading(this, 'Starting...');
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            hideLoading(this, '<i class="fas fa-play"></i> Start Extraction');
+            this.disabled = false;
+          })
+          .withFailureHandler(function(error) {
+            hideLoading(this, '<i class="fas fa-play"></i> Start Extraction');
+            this.disabled = false;
+            showError(error);
+          })
+          .startProcessing();
+      });
+      
+      // Pause processing
+      document.getElementById('pauseProcessing').addEventListener('click', function() {
+        this.disabled = true;
+        showLoading(this, 'Pausing...');
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            hideLoading(this, '<i class="fas fa-pause"></i> Pause Processing');
+            this.disabled = false;
+          })
+          .withFailureHandler(function(error) {
+            hideLoading(this, '<i class="fas fa-pause"></i> Pause Processing');
+            this.disabled = false;
+            showError(error);
+          })
+          .pauseProcessing();
+      });
+      
+      // Resume processing
+      document.getElementById('resumeProcessing').addEventListener('click', function() {
+        this.disabled = true;
+        showLoading(this, 'Resuming...');
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            hideLoading(this, '<i class="fas fa-play"></i> Resume Processing');
+            this.disabled = false;
+          })
+          .withFailureHandler(function(error) {
+            hideLoading(this, '<i class="fas fa-play"></i> Resume Processing');
+            this.disabled = false;
+            showError(error);
+          })
+          .resumeProcessing();
+      });
+      
+      // Stop processing
+      document.getElementById('stopProcessing').addEventListener('click', function() {
+        this.disabled = true;
+        showLoading(this, 'Stopping...');
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            hideLoading(this, '<i class="fas fa-stop"></i> Stop Processing');
+            this.disabled = false;
+          })
+          .withFailureHandler(function(error) {
+            hideLoading(this, '<i class="fas fa-stop"></i> Stop Processing');
+            this.disabled = false;
+            showError(error);
+          })
+          .stopProcessing();
+      });
+      
+      // Reset progress
+      document.getElementById('resetProcessing').addEventListener('click', function() {
+        if (!confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+          return;
+        }
+        
+        this.disabled = true;
+        showLoading(this, 'Resetting...');
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            hideLoading(this, '<i class="fas fa-undo"></i> Reset Progress');
+            this.disabled = false;
+          })
+          .withFailureHandler(function(error) {
+            hideLoading(this, '<i class="fas fa-undo"></i> Reset Progress');
+            this.disabled = false;
+            showError(error);
+          })
+          .resetProgress();
+      });
+      
+      // Configure API keys
+      document.getElementById('configureApiKeys').addEventListener('click', function() {
+        google.script.run.showApiKeyConfig();
+      });
+      
+      // Show logs
+      document.getElementById('showLogs').addEventListener('click', function() {
+        google.script.run.showLogs();
+      });
+      
+      // Open dashboard
+      document.getElementById('openDashboard').addEventListener('click', function() {
+        google.script.run.openDashboard();
+      });
+      
+      // Data center
+      document.getElementById('dataCenter').addEventListener('click', function() {
+        google.script.run.openDataCenter();
+      });
+    });
+    
+    // Helper functions
+    function showLoading(button, text) {
+      button.innerHTML = '<span class="loader"></span> ' + text;
+    }
+    
+    function hideLoading(button, html) {
+      button.innerHTML = html;
+    }
+    
+    function showError(error) {
+      // Implement error display logic
+      console.error(error);
+    }
+  </script>
+</body>
+</html>
