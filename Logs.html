@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      color: #333;
+    }
+    
+    .logs-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .log-entry {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-family: monospace;
+    }
+    
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .log-timestamp {
+      color: #666;
+      margin-right: 8px;
+    }
+    
+    .log-level {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-right: 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .level-INFO {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .level-WARN {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    
+    .level-ERROR {
+      background: #ffebee;
+      color: #d32f2f;
+    }
+    
+    .log-category {
+      color: #555;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    
+    .log-message {
+      white-space: pre-wrap;
+    }
+    
+    .controls {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1565c0;
+    }
+    
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #f57c00;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="refreshBtn" class="btn btn-primary">
+      <i class="fas fa-sync-alt"></i> Refresh Logs
+    </button>
+    <button id="clearBtn" class="btn btn-warning">
+      <i class="fas fa-trash"></i> Clear Logs
+    </button>
+  </div>
+  
+  <div id="logsContainer" class="logs-container">
+    <div class="empty-state">Loading logs...</div>
+  </div>
+  
+  <script>
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadLogs();
+      
+      // Refresh button
+      document.getElementById('refreshBtn').addEventListener('click', loadLogs);
+      
+      // Clear button
+      document.getElementById('clearBtn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear all logs? This cannot be undone.')) {
+          clearLogs();
+        }
+      });
+    });
+    
+    // Load logs
+    function loadLogs() {
+      const container = document.getElementById('logsContainer');
+      
+      google.script.run
+        .withSuccessHandler(function(logs) {
+          if (!logs || logs.length === 0) {
+            container.innerHTML = '<div class="empty-state">No logs found</div>';
+            return;
+          }
+          
+          container.innerHTML = logs.map(log => `
+            <div class="log-entry">
+              <span class="log-timestamp">${new Date(log.timestamp).toLocaleString()}</span>
+              <span class="log-level level-${log.level}">${log.level}</span>
+              <span class="log-category">[${log.category}]</span>
+              <span class="log-message">${log.message}</span>
+              ${log.error ? `<div class="log-error">${log.error}</div>` : ''}
+            </div>
+          `).join('');
+          
+          // Scroll to bottom
+          container.scrollTop = container.scrollHeight;
+        })
+        .withFailureHandler(function(error) {
+          container.innerHTML = `
+            <div class="empty-state">
+              Error loading logs: ${error.message || error}
+            </div>
+          `;
+        })
+        .getRecentLogs();
+    }
+    
+    // Clear logs
+    function clearLogs() {
+      const container = document.getElementById('logsContainer');
+      container.innerHTML = '<div class="empty-state">Clearing logs...</div>';
+      
+      google.script.run
+        .withSuccessHandler(function(success) {
+          if (success) {
+            container.innerHTML = '<div class="empty-state">Logs cleared successfully</div>';
+          } else {
+            container.innerHTML = '<div class="empty-state">Failed to clear logs</div>';
+          }
+        })
+        .withFailureHandler(function(error) {
+          container.innerHTML = `
+            <div class="empty-state">
+              Error clearing logs: ${error.message || error}
+            </div>
+          `;
+        })
+        .clearLogs();
+    }
+  </script>
+</body>
+</html>

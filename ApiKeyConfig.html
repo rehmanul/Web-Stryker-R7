@@ -6,15 +6,9 @@
   <style>
     body {
       font-family: 'Roboto', Arial, sans-serif;
-      color: #333;
-      line-height: 1.6;
       margin: 0;
       padding: 16px;
-    }
-    
-    h2 {
-      color: #1976d2;
-      margin-top: 0;
+      color: #333;
     }
     
     .form-group {
@@ -41,6 +35,12 @@
       border-color: #1976d2;
       outline: none;
       box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    }
+    
+    .helper-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
     }
     
     .controls {
@@ -77,13 +77,139 @@
       background: #e0e0e0;
     }
     
-    .helper-text {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
+    .message {
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 16px;
+      display: none;
     }
     
-    .error-message {
-      color: #f44336;
-      font-size: 14px;
-      margin-top: 16
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+    
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+  </style>
+</head>
+<body>
+  <form id="apiKeyForm">
+    <div class="form-group">
+      <label for="azureOpenaiKey">Azure OpenAI API Key</label>
+      <input type="password" id="azureOpenaiKey" name="AZURE_OPENAI_KEY" required>
+      <div class="helper-text">Required for AI-based data extraction</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="azureOpenaiEndpoint">Azure OpenAI Endpoint</label>
+      <input type="text" id="azureOpenaiEndpoint" name="AZURE_OPENAI_ENDPOINT" 
+             placeholder="https://your-resource.openai.azure.com/" required>
+      <div class="helper-text">Your Azure OpenAI service endpoint URL</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="azureOpenaiDeployment">Azure OpenAI Deployment</label>
+      <input type="text" id="azureOpenaiDeployment" name="AZURE_OPENAI_DEPLOYMENT" 
+             placeholder="gpt-4-turbo" required>
+      <div class="helper-text">Your model deployment name</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="azureBingKey">Azure Bing Search API Key</label>
+      <input type="password" id="azureBingKey" name="AZURE_BING_KEY" required>
+      <div class="helper-text">Required for web search functionality</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="azureBingEndpoint">Azure Bing Search Endpoint</label>
+      <input type="text" id="azureBingEndpoint" name="AZURE_BING_ENDPOINT" 
+             value="https://api.bing.microsoft.com/v7.0/search" required>
+      <div class="helper-text">Bing Search API endpoint URL</div>
+    </div>
+    
+    <div id="message" class="message"></div>
+    
+    <div class="controls">
+      <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save API Keys</button>
+    </div>
+  </form>
+
+  <script>
+    // Load current values
+    google.script.run
+      .withSuccessHandler(function(values) {
+        if (values.AZURE_OPENAI_KEY) {
+          document.getElementById('azureOpenaiKey').value = values.AZURE_OPENAI_KEY;
+        }
+        if (values.AZURE_OPENAI_ENDPOINT) {
+          document.getElementById('azureOpenaiEndpoint').value = values.AZURE_OPENAI_ENDPOINT;
+        }
+        if (values.AZURE_OPENAI_DEPLOYMENT) {
+          document.getElementById('azureOpenaiDeployment').value = values.AZURE_OPENAI_DEPLOYMENT;
+        }
+        if (values.AZURE_BING_KEY) {
+          document.getElementById('azureBingKey').value = values.AZURE_BING_KEY;
+        }
+        if (values.AZURE_BING_ENDPOINT) {
+          document.getElementById('azureBingEndpoint').value = values.AZURE_BING_ENDPOINT;
+        }
+      })
+      .getScriptProperties();
+    
+    // Handle form submission
+    document.getElementById('apiKeyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+      
+      const formData = {
+        AZURE_OPENAI_KEY: document.getElementById('azureOpenaiKey').value,
+        AZURE_OPENAI_ENDPOINT: document.getElementById('azureOpenaiEndpoint').value,
+        AZURE_OPENAI_DEPLOYMENT: document.getElementById('azureOpenaiDeployment').value,
+        AZURE_BING_KEY: document.getElementById('azureBingKey').value,
+        AZURE_BING_ENDPOINT: document.getElementById('azureBingEndpoint').value
+      };
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save API Keys';
+          
+          const messageEl = document.getElementById('message');
+          messageEl.style.display = 'block';
+          
+          if (result.success) {
+            messageEl.className = 'message success';
+            messageEl.textContent = 'API keys saved successfully!';
+            
+            // Close dialog after delay
+            setTimeout(function() {
+              google.script.host.close();
+            }, 2000);
+          } else {
+            messageEl.className = 'message error';
+            messageEl.textContent = result.message || 'Failed to save API keys';
+          }
+        })
+        .withFailureHandler(function(error) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save API Keys';
+          
+          const messageEl = document.getElementById('message');
+          messageEl.style.display = 'block';
+          messageEl.className = 'message error';
+          messageEl.textContent = 'Error: ' + (error.message || error);
+        })
+        .saveScriptProperties(formData);
+    });
+  </script>
+</body>
+</html>
