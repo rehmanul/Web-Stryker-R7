@@ -17,6 +17,12 @@ function onOpen() {
     .addSeparator()
     .addItem('Settings', 'showSettings')
     .addItem('Configure API Keys', 'showApiKeyConfig')
+    .addSeparator()
+    .addSubMenu(ui.createMenu('Tests')
+      .addItem('Run All Tests', 'runAllTests')
+      .addItem('Test Components', 'testComponents')
+      .addItem('Test API Configuration', 'testApiConfigurations')
+      .addItem('Test Extraction', 'testExtraction'))
     .addToUi();
 }
 
@@ -72,4 +78,19 @@ function showLogs() {
     .setHeight(500);
   
   SpreadsheetApp.getUi().showModalDialog(html, 'System Logs');
+}
+
+// Initialize the application
+function initialize() {
+  // Initialize properties with default values
+  initializeDefaultProperties();
+  
+  // Initialize storage system
+  Storage.initialize();
+  
+  // Initialize logger
+  Logger.init(CONFIG.MONITORING.LOG_LEVEL);
+  
+  Logger.info('INIT', 'Application initialized successfully');
+  return true;
 }

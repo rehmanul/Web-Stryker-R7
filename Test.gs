@@ -168,15 +168,3 @@ function runAllTests() {
   Logger.info('TEST', 'All tests completed', results);
   return results;
 }
-
-// Create menu item for running tests
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  ui.createMenu('🧪 Tests')
-    .addItem('Run All Tests', 'runAllTests')
-    .addSeparator()
-    .addItem('Test Components', 'testComponents')
-    .addItem('Test API Configuration', 'testApiConfigurations')
-    .addItem('Test Extraction', 'testExtraction')
-    .addToUi();
-}
