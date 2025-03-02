@@ -4,165 +4,91 @@
   <base target="_top">
   <meta charset="UTF-8">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* Your existing styles from Index.html */
     body {
       font-family: 'Inter', sans-serif;
       margin: 0;
-      padding: 16px;
+      padding: 24px;
       color: #333;
     }
     
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .section {
+      margin-bottom: 32px;
     }
     
-    .card-title {
-      font-size: 20px;
+    h2 {
+      color: #2196f3;
+      font-size: 24px;
       font-weight: 600;
-      margin-bottom: 16px;
-      color: #1976d2;
+      margin: 0 0 12px 0;
     }
     
-    .card-content {
+    p {
       color: #666;
-      margin-bottom: 16px;
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      line-height: 1.5;
     }
     
-    .action-button {
-      background: #1976d2;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
+    .button {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      transition: background 0.3s;
+      padding: 8px 16px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
     }
     
-    .action-button:hover {
+    .button:hover {
+      background: #1976d2;
+    }
+    
+    .button:active {
       background: #1565c0;
     }
     
-    .action-button i {
-      font-size: 16px;
-    }
-    
-    .message {
-      padding: 8px 16px;
-      border-radius: 4px;
-      margin-top: 16px;
-      display: none;
-    }
-    
-    .message.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    
-    .message.error {
-      background: #ffebee;
-      color: #c62828;
+    .button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 class="card-title">Data Extraction</h2>
-    <div class="card-content">
-      Extract product information from websites with advanced pattern recognition and AI processing.
-    </div>
-    <button onclick="startExtraction()" class="action-button">
-      <i class="fas fa-play"></i> Start Extraction
-    </button>
+  <div class="section">
+    <h2>Data Extraction</h2>
+    <p>Extract product information from websites with advanced pattern recognition and AI processing.</p>
+    <button onclick="startExtraction()" class="button">Start Extraction</button>
   </div>
   
-  <div class="card">
-    <h2 class="card-title">AI Processing</h2>
-    <div class="card-content">
-      Process and analyze extracted data using advanced AI models for enhanced insights.
-    </div>
-    <button onclick="startProcessing()" class="action-button">
-      <i class="fas fa-brain"></i> Start Processing
-    </button>
+  <div class="section">
+    <h2>AI Processing</h2>
+    <p>Process and analyze extracted data using advanced AI models for enhanced insights.</p>
+    <button onclick="startProcessing()" class="button">Start Processing</button>
   </div>
   
-  <div class="card">
-    <h2 class="card-title">Configuration</h2>
-    <div class="card-content">
-      Configure API keys, extraction settings, and system preferences.
-    </div>
-    <button onclick="openConfiguration()" class="action-button">
-      <i class="fas fa-cog"></i> Configure
-    </button>
+  <div class="section">
+    <h2>Configuration</h2>
+    <p>Configure API keys, extraction settings, and system preferences.</p>
+    <button onclick="openConfiguration()" class="button">Configure</button>
   </div>
-  
-  <div id="message" class="message"></div>
   
   <script>
-    // Start extraction
     function startExtraction() {
-      showMessage('Starting extraction...', 'info');
-      google.script.run
-        .withSuccessHandler(function(result) {
-          if (result.success) {
-            showMessage('Extraction started successfully', 'success');
-            // Open Data Center
-            google.script.run.showDataCenter();
-          } else {
-            showMessage(result.message || 'Failed to start extraction', 'error');
-          }
-        })
-        .withFailureHandler(function(error) {
-          showMessage('Error: ' + error.message, 'error');
-        })
-        .startExtraction();
+      google.script.run.showDataCenter();
     }
     
-    // Start processing
     function startProcessing() {
-      showMessage('Starting AI processing...', 'info');
-      google.script.run
-        .withSuccessHandler(function(result) {
-          if (result.success) {
-            showMessage('Processing started successfully', 'success');
-            // Open Stryke Center
-            google.script.run.showStrykeCenter();
-          } else {
-            showMessage(result.message || 'Failed to start processing', 'error');
-          }
-        })
-        .withFailureHandler(function(error) {
-          showMessage('Error: ' + error.message, 'error');
-        })
-        .startProcessing();
+      google.script.run.showStrykeCenter();
     }
     
-    // Open configuration
     function openConfiguration() {
       google.script.run.showSettings();
-    }
-    
-    // Show message
-    function showMessage(text, type) {
-      const messageEl = document.getElementById('message');
-      messageEl.textContent = text;
-      messageEl.className = 'message ' + type;
-      messageEl.style.display = 'block';
-      
-      // Hide after 5 seconds
-      setTimeout(function() {
-        messageEl.style.display = 'none';
-      }, 5000);
     }
   </script>
 </body>

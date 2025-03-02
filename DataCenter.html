@@ -57,29 +57,6 @@
       resize: vertical;
     }
     
-    .extraction-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    
-    .option-pill {
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      padding: 4px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .option-pill.active {
-      background: #1976d2;
-      color: white;
-      border-color: #1976d2;
-    }
-    
     .preview-panel {
       background: #f8f9fa;
       border-radius: 4px;
@@ -164,45 +141,11 @@
       <h2 class="panel-title">Data Source</h2>
       
       <div class="form-group">
-        <label for="sourceType">Source Type</label>
-        <select id="sourceType">
-          <option value="url">Website URL</option>
-          <option value="text">Raw Text</option>
-          <option value="spreadsheet">Spreadsheet</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="sourceInput">Source Input</label>
-        <textarea id="sourceInput" placeholder="Enter URL, text, or reference"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label>Extraction Profile</label>
-        <div class="extraction-options">
-          <div class="option-pill active" data-profile="product">
-            <i class="fas fa-box"></i> Product Data
-          </div>
-          <div class="option-pill" data-profile="nutrition">
-            <i class="fas fa-apple-alt"></i> Nutritional Info
-          </div>
-          <div class="option-pill" data-profile="compliance">
-            <i class="fas fa-shield-alt"></i> Compliance
-          </div>
-          <div class="option-pill" data-profile="market">
-            <i class="fas fa-chart-line"></i> Market Analysis
-          </div>
-        </div>
+        <label for="sourceInput">Website URL</label>
+        <textarea id="sourceInput" placeholder="Enter website URL to extract data from"></textarea>
       </div>
       
       <div id="message" class="message"></div>
-    </div>
-    
-    <div class="panel">
-      <h2 class="panel-title">Preview</h2>
-      <div id="previewPanel" class="preview-panel">
-        Extraction preview will appear here.
-      </div>
       
       <div class="actions">
         <button id="previewBtn" class="action-button">
@@ -213,27 +156,24 @@
         </button>
       </div>
     </div>
+    
+    <div class="panel">
+      <h2 class="panel-title">Preview</h2>
+      <div id="previewPanel" class="preview-panel">
+        Extraction preview will appear here.
+      </div>
+    </div>
   </div>
   
   <script>
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-      // Extraction profile selection
-      document.querySelectorAll('.option-pill').forEach(pill => {
-        pill.addEventListener('click', function() {
-          document.querySelectorAll('.option-pill').forEach(p => p.classList.remove('active'));
-          this.classList.add('active');
-        });
-      });
-      
       // Preview button
       document.getElementById('previewBtn').addEventListener('click', function() {
-        const sourceType = document.getElementById('sourceType').value;
-        const sourceInput = document.getElementById('sourceInput').value;
-        const profile = document.querySelector('.option-pill.active').dataset.profile;
+        const url = document.getElementById('sourceInput').value;
         
-        if (!sourceInput) {
-          showMessage('Please enter a source input', 'error');
+        if (!url) {
+          showMessage('Please enter a website URL', 'error');
           return;
         }
         
@@ -257,17 +197,15 @@
             document.getElementById('previewBtn').innerHTML = '<i class="fas fa-eye"></i> Preview';
             showMessage('Error: ' + error.message, 'error');
           })
-          .previewExtraction(sourceType, sourceInput, profile);
+          .previewExtraction(url);
       });
       
       // Extract button
       document.getElementById('extractBtn').addEventListener('click', function() {
-        const sourceType = document.getElementById('sourceType').value;
-        const sourceInput = document.getElementById('sourceInput').value;
-        const profile = document.querySelector('.option-pill.active').dataset.profile;
+        const url = document.getElementById('sourceInput').value;
         
-        if (!sourceInput) {
-          showMessage('Please enter a source input', 'error');
+        if (!url) {
+          showMessage('Please enter a website URL', 'error');
           return;
         }
         
@@ -294,7 +232,7 @@
             document.getElementById('extractBtn').innerHTML = '<i class="fas fa-download"></i> Extract Data';
             showMessage('Error: ' + error.message, 'error');
           })
-          .startExtraction(sourceType, sourceInput, profile);
+          .startExtraction(url);
       });
     });
     
