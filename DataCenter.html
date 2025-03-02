@@ -1,604 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Center - AI Extractor Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #4285f4;
-            --primary-gradient: linear-gradient(135deg, #4285f4, #34a853);
-            --secondary-color: #5f6368;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            --background-color: #ffffff;
-            --surface-color: #f8f9fa;
-            --text-primary: #202124;
-            --text-secondary: #5f6368;
-            --border-color: #dadce0;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
-            --border-radius: 12px;
-            --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --font-family: 'Inter', sans-serif;
-        }
-
-        body.dark-theme {
-            --primary-color: #8ab4f8;
-            --primary-gradient: linear-gradient(135deg, #8ab4f8, #34a853);
-            --secondary-color: #9aa0a6;
-            --background-color: #1a1a1a;
-            --surface-color: #292a2d;
-            --text-primary: #e8eaed;
-            --text-secondary: #9aa0a6;
-            --border-color: #3c4043;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
-        }
-
-        body {
-            font-family: var(--font-family);
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-            min-height: 100vh;
-        }
-
-        /* Wave Animation */
-        .wave-container {
-            position: fixed;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .wave {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: var(--primary-gradient);
-            opacity: 0.05;
-            transform-origin: 50% 48%;
-            border-radius: 43%;
-            animation: wave 20s infinite linear;
-            top: -50%;
-        }
-
-        .wave-2 {
-            animation: wave 25s infinite linear;
-            opacity: 0.03;
-        }
-
-        @keyframes wave {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Neural Network Background */
-        .neural-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        .node {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-        }
-
-        .header {
-            background-color: rgba(41, 42, 45, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 0;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 20px;
-            font-weight: 500;
-        }
-
-        .logo i {
-            font-size: 24px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .extraction-panel {
-            display: flex;
-            gap: 30px;
-            margin-top: 100px;
-            margin-bottom: 40px;
-        }
-
-        .source-panel, .preview-panel {
-            flex: 1;
-            background: var(--surface-color);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--box-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .source-panel::before, .preview-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--card-gradient);
-            pointer-events: none;
-        }
-
-        .panel-title {
-            margin: 0 0 20px 0;
-            font-size: 24px;
-            font-weight: 600;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-        }
-
-        .extraction-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: relative;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-weight: 500;
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        .form-input {
-            padding: 12px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            background: var(--background-color);
-            color: var(--text-primary);
-            font-family: var(--font-family);
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
-        }
-
-        .extraction-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .option-pill {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--text-primary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .option-pill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--primary-gradient);
-            opacity: 0.1;
-            transition: all 0.3s ease;
-        }
-
-        .option-pill:hover::before {
-            left: 0;
-        }
-
-        .option-pill.active {
-            background: var(--primary-gradient);
-            border-color: transparent;
-            color: white;
-        }
-
-        .preview-content {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            background: var(--background-color);
-            color: var(--text-primary);
-            font-size: 14px;
-            line-height: 1.5;
-            position: relative;
-        }
-
-        .extraction-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .action-button {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .action-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: all 0.5s ease;
-        }
-
-        .action-button:hover::before {
-            left: 100%;
-        }
-
-        .action-button i {
-            font-size: 16px;
-            transition: transform 0.3s ease;
-        }
-
-        .action-button:hover i {
-            transform: translateX(3px);
-        }
-
-        @media (max-width: 768px) {
-            .extraction-panel {
-                flex-direction: column;
-            }
-
-            .panel-title {
-                font-size: 20px;
-            }
-
-            .extraction-options {
-                justify-content: center;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--surface-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-            filter: brightness(1.2);
-        }
-    </style>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 16px;
+      color: #333;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    .panel {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .panel-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1976d2;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .extraction-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .option-pill {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .option-pill.active {
+      background: #1976d2;
+      color: white;
+      border-color: #1976d2;
+    }
+    
+    .preview-panel {
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 16px;
+      min-height: 200px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    
+    .action-button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
+    }
+    
+    .action-button:hover {
+      background: #1565c0;
+    }
+    
+    .action-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .action-button i {
+      font-size: 16px;
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .message {
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin-top: 16px;
+      display: none;
+    }
+    
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <!-- Wave Animation Background -->
-    <div class="wave-container">
-        <div class="wave"></div>
-        <div class="wave wave-2"></div>
-    </div>
-
-    <!-- Neural Network Background -->
-    <div class="neural-bg" id="neuralBg"></div>
-
-    <div class="container">
-        <header class="header">
-            <a href="#" class="logo" onclick="goToHome()">
-                <i class="fas fa-robot"></i>
-                AI Extractor Pro - Data Center
-            </a>
-        </header>
-        
-        <div class="extraction-panel">
-            <div class="source-panel">
-                <h2 class="panel-title">Data Source</h2>
-                
-                <form class="extraction-form" id="extractionForm">
-                    <div class="form-group">
-                        <label for="sourceType">Source Type</label>
-                        <select id="sourceType" class="form-input">
-                            <option value="url">Website URL</option>
-                            <option value="text">Raw Text</option>
-                            <option value="spreadsheet">Spreadsheet</option>
-                            <option value="file">File Upload</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="sourceInput">Source Input</label>
-                        <textarea id="sourceInput" class="form-input" rows="8" placeholder="Enter URL, text, or reference"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Extraction Profile</label>
-                        <div class="extraction-options">
-                            <div class="option-pill active" data-profile="product">
-                                <i class="fas fa-box"></i> Product Data
-                            </div>
-                            <div class="option-pill" data-profile="nutrition">
-                                <i class="fas fa-apple-alt"></i> Nutritional Info
-                            </div>
-                            <div class="option-pill" data-profile="compliance">
-                                <i class="fas fa-shield-alt"></i> Compliance
-                            </div>
-                            <div class="option-pill" data-profile="market">
-                                <i class="fas fa-chart-line"></i> Market Analysis
-                            </div>
-                            <div class="option-pill" data-profile="custom">
-                                <i class="fas fa-cog"></i> Custom
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="extractionOptions">Advanced Options</label>
-                        <select id="extractionOptions" class="form-input" multiple size="3">
-                            <option value="deepScan">Deep Scan</option>
-                            <option value="multiLanguage">Multi-Language Support</option>
-                            <option value="mediaAnalysis">Media Analysis</option>
-                            <option value="structuredOutput">Structured Output</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="preview-panel">
-                <h2 class="panel-title">Preview</h2>
-                
-                <div class="preview-content" id="previewContent">
-                    <p>Extraction preview will appear here.</p>
-                </div>
-                
-                <div class="extraction-actions">
-                    <button id="previewBtn" class="action-button">
-                        <i class="fas fa-eye"></i> Preview
-                    </button>
-                    <button id="extractBtn" class="action-button">
-                        <i class="fas fa-download"></i> Extract Data
-                    </button>
-                </div>
-            </div>
+  <div class="container">
+    <div class="panel">
+      <h2 class="panel-title">Data Source</h2>
+      
+      <div class="form-group">
+        <label for="sourceType">Source Type</label>
+        <select id="sourceType">
+          <option value="url">Website URL</option>
+          <option value="text">Raw Text</option>
+          <option value="spreadsheet">Spreadsheet</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="sourceInput">Source Input</label>
+        <textarea id="sourceInput" placeholder="Enter URL, text, or reference"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Extraction Profile</label>
+        <div class="extraction-options">
+          <div class="option-pill active" data-profile="product">
+            <i class="fas fa-box"></i> Product Data
+          </div>
+          <div class="option-pill" data-profile="nutrition">
+            <i class="fas fa-apple-alt"></i> Nutritional Info
+          </div>
+          <div class="option-pill" data-profile="compliance">
+            <i class="fas fa-shield-alt"></i> Compliance
+          </div>
+          <div class="option-pill" data-profile="market">
+            <i class="fas fa-chart-line"></i> Market Analysis
+          </div>
         </div>
+      </div>
+      
+      <div id="message" class="message"></div>
     </div>
-
-    <script>
-        // Check if running in Google Apps Script environment
-        const isGoogleAppsScript = typeof google !== 'undefined' && google.script;
-
-        // Initialize neural network background
-        function initNeuralBackground() {
-            const bg = document.getElementById('neuralBg');
-            const nodes = 50;
-            
-            for (let i = 0; i < nodes; i++) {
-                const node = document.createElement('div');
-                node.className = 'node';
-                node.style.left = `${Math.random() * 100}%`;
-                node.style.top = `${Math.random() * 100}%`;
-                node.style.animationDelay = `${Math.random() * 2}s`;
-                bg.appendChild(node);
-            }
-        }
-
-        // Navigation
-        function goToHome() {
-            if (isGoogleAppsScript) {
-                google.script.run.UI.showIndex();
-            } else {
-                window.location.href = 'Index.html';
-            }
-        }
-
-        // Initialize the data center
-        document.addEventListener('DOMContentLoaded', function() {
-            initNeuralBackground();
-
-            // Set up event listeners
-            document.querySelectorAll('.option-pill').forEach(pill => {
-                pill.addEventListener('click', function() {
-                    // Toggle active class
-                    document.querySelectorAll('.option-pill').forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update form based on selected profile
-                    updateFormForProfile(this.dataset.profile);
-                });
-            });
-            
-            document.getElementById('previewBtn').addEventListener('click', function() {
-                // Get form data
-                const sourceType = document.getElementById('sourceType').value;
-                const sourceInput = document.getElementById('sourceInput').value;
-                const profile = document.querySelector('.option-pill.active').dataset.profile;
-                
-                if (isGoogleAppsScript) {
-                    // Call backend for preview
-                    google.script.run
-                        .withSuccessHandler(updatePreview)
-                        .withFailureHandler(handlePreviewError)
-                        .previewExtraction(sourceType, sourceInput, profile);
-                } else {
-                    // Local testing preview
-                    const mockPreview = {
-                        sourceType,
-                        input: sourceInput,
-                        profile,
-                        timestamp: new Date().toISOString(),
-                        status: 'preview'
-                    };
-                    updatePreview(mockPreview);
-                }
-            });
-            
-            document.getElementById('extractBtn').addEventListener('click', function() {
-                // Get form data for actual extraction
-                const formData = getFormData();
-                
-                if (isGoogleAppsScript) {
-                    // Call backend for extraction
-                    google.script.run
-                        .withSuccessHandler(handleExtractionSuccess)
-                        .withFailureHandler(handleExtractionError)
-                        .executeExtraction(formData);
-                } else {
-                    // Local testing extraction
-                    const mockResult = {
-                        ...formData,
-                        timestamp: new Date().toISOString(),
-                        status: 'completed'
-                    };
-                    handleExtractionSuccess(mockResult);
-                }
-            });
+    
+    <div class="panel">
+      <h2 class="panel-title">Preview</h2>
+      <div id="previewPanel" class="preview-panel">
+        Extraction preview will appear here.
+      </div>
+      
+      <div class="actions">
+        <button id="previewBtn" class="action-button">
+          <i class="fas fa-eye"></i> Preview
+        </button>
+        <button id="extractBtn" class="action-button">
+          <i class="fas fa-download"></i> Extract Data
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Extraction profile selection
+      document.querySelectorAll('.option-pill').forEach(pill => {
+        pill.addEventListener('click', function() {
+          document.querySelectorAll('.option-pill').forEach(p => p.classList.remove('active'));
+          this.classList.add('active');
         });
+      });
+      
+      // Preview button
+      document.getElementById('previewBtn').addEventListener('click', function() {
+        const sourceType = document.getElementById('sourceType').value;
+        const sourceInput = document.getElementById('sourceInput').value;
+        const profile = document.querySelector('.option-pill.active').dataset.profile;
         
-        function updateFormForProfile(profile) {
-            // Update form fields based on selected profile
-            const sourceInput = document.getElementById('sourceInput');
-            const extractionOptions = document.getElementById('extractionOptions');
-            
-            switch(profile) {
-                case 'product':
-                    sourceInput.placeholder = 'Enter product URL or details';
-                    break;
-                case 'nutrition':
-                    sourceInput.placeholder = 'Enter food product URL or nutritional text';
-                    break;
-                case 'compliance':
-                    sourceInput.placeholder = 'Enter compliance document URL or text';
-                    break;
-                case 'market':
-                    sourceInput.placeholder = 'Enter market data source URL or text';
-                    break;
-                case 'custom':
-                    sourceInput.placeholder = 'Enter custom source URL or text';
-                    break;
-            }
+        if (!sourceInput) {
+          showMessage('Please enter a source input', 'error');
+          return;
         }
         
-        function getFormData() {
-            return {
-                sourceType: document.getElementById('sourceType').value,
-                sourceInput: document.getElementById('sourceInput').value,
-                profile: document.querySelector('.option-pill.active').dataset.profile,
-                options: Array.from(document.getElementById('extractionOptions').selectedOptions).map(opt => opt.value)
-            };
-        }
+        this.disabled = true;
+        this.innerHTML = '<span class="loader"></span> Previewing...';
         
-        function updatePreview(previewData) {
-            const previewElement = document.getElementById('previewContent');
+        google.script.run
+          .withSuccessHandler(function(result) {
+            document.getElementById('previewBtn').disabled = false;
+            document.getElementById('previewBtn').innerHTML = '<i class="fas fa-eye"></i> Preview';
             
-            if (typeof previewData === 'object') {
-                previewElement.innerHTML = '<pre>' + JSON.stringify(previewData, null, 2) + '</pre>';
+            if (result.success) {
+              document.getElementById('previewPanel').textContent = 
+                JSON.stringify(result.data, null, 2);
             } else {
-                previewElement.textContent = previewData || 'No preview data available.';
+              showMessage(result.message || 'Preview failed', 'error');
             }
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('previewBtn').disabled = false;
+            document.getElementById('previewBtn').innerHTML = '<i class="fas fa-eye"></i> Preview';
+            showMessage('Error: ' + error.message, 'error');
+          })
+          .previewExtraction(sourceType, sourceInput, profile);
+      });
+      
+      // Extract button
+      document.getElementById('extractBtn').addEventListener('click', function() {
+        const sourceType = document.getElementById('sourceType').value;
+        const sourceInput = document.getElementById('sourceInput').value;
+        const profile = document.querySelector('.option-pill.active').dataset.profile;
+        
+        if (!sourceInput) {
+          showMessage('Please enter a source input', 'error');
+          return;
         }
         
-        function handlePreviewError(error) {
-            console.error('Preview error:', error);
-            document.getElementById('previewContent').innerHTML = 
-                '<div style="color: var(--error-color);">Error generating preview: ' + error + '</div>';
-        }
+        this.disabled = true;
+        this.innerHTML = '<span class="loader"></span> Extracting...';
         
-        function handleExtractionSuccess(result) {
-            updatePreview(result);
-            alert('Extraction completed successfully!');
-        }
-        
-        function handleExtractionError(error) {
-            console.error('Extraction error:', error);
-            alert('Error during extraction: ' + error);
-        }
-    </script>
+        google.script.run
+          .withSuccessHandler(function(result) {
+            document.getElementById('extractBtn').disabled = false;
+            document.getElementById('extractBtn').innerHTML = '<i class="fas fa-download"></i> Extract Data';
+            
+            if (result.success) {
+              showMessage('Data extracted successfully!', 'success');
+              // Close dialog after delay
+              setTimeout(function() {
+                google.script.host.close();
+              }, 2000);
+            } else {
+              showMessage(result.message || 'Extraction failed', 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('extractBtn').disabled = false;
+            document.getElementById('extractBtn').innerHTML = '<i class="fas fa-download"></i> Extract Data';
+            showMessage('Error: ' + error.message, 'error');
+          })
+          .startExtraction(sourceType, sourceInput, profile);
+      });
+    });
+    
+    // Show message
+    function showMessage(text, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + type;
+      messageEl.style.display = 'block';
+      
+      // Hide after 5 seconds
+      setTimeout(function() {
+        messageEl.style.display = 'none';
+      }, 5000);
+    }
+  </script>
 </body>
 </html>
