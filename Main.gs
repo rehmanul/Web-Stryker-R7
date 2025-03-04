@@ -15,7 +15,40 @@ function getPage(page) {
     .evaluate()
     .getContent();
 }
+function getStrykeStats() {
+  try {
+    var stats = calculateStats();
+    Logger.log(stats);
+    return stats;
+  } catch (e) {
+    Logger.log("Error calculating stats: " + e.message);
+    throw new Error("Failed to calculate statistics: " + e.message);
+  }
+}
 
+function getStrykeData() {
+  try {
+    var data = retrieveData();
+    Logger.log(data);
+    return data;
+  } catch (e) {
+    Logger.log("Error retrieving data: " + e.message);
+    throw new Error("Failed to retrieve data: " + e.message);
+  }
+}
+
+function filterData(data, criteria) {
+  try {
+    var filteredData = data.filter(function(item) {
+      return item.someProperty === criteria;
+    });
+    Logger.log(filteredData);
+    return filteredData;
+  } catch (e) {
+    Logger.log("Error filtering data: " + e.message);
+    throw new Error("Failed to filter data: " + e.message);
+  }
+}
 function getStrykeStats() {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Config.SHEETS.DATA);
