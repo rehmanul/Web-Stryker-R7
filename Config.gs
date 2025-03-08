@@ -109,64 +109,185 @@ const CONFIG = {
   },
 
   /**
-   * Validates API configuration
+   * Validates the configuration and API keys
+   * @returns {Object} Validation result with status and details
    */
   validateConfig: function() {
-    // Load API keys from storage
-    this.loadApiKeys();
-    
-    const required = ['AZURE.BING.KEY', 'AZURE.OPENAI.KEY', 'KNOWLEDGE_GRAPH.KEY'];
-    const missing = [];
+    try {
+      // Load API keys from storage
+      this.loadApiKeys();
+      
+      const required = ['AZURE.BING.KEY', 'AZURE.OPENAI.KEY', 'KNOWLEDGE_GRAPH.KEY'];
+      const missing = [];
+      const invalid = [];
 
-    required.forEach(key => {
-      const value = this.getNestedValue(this.API, key);
-      if (!value) missing.push(key);
-    });
+      required.forEach(key => {
+        const value = this.getNestedValue(this.API, key);
+        if (!value) {
+          missing.push(key);
+        } else if (value.length < this.SECURITY.MIN_API_KEY_LENGTH) {
+          invalid.push(key);
+        }
+      });
 
-    if (missing.length > 0) {
-      Logger.warn("CONFIG", `Missing required API keys: ${missing.join(', ')}`);
-      return false;
+      // Check API endpoints
+      if (!this.API.AZURE.OPENAI.ENDPOINT || !this.API.AZURE.OPENAI.ENDPOINT.startsWith('https://')) {
+        invalid.push('AZURE.OPENAI.ENDPOINT');
+      }
+
+      const hasErrors = missing.length > 0 || invalid.length > 0;
+      
+      if (hasErrors) {
+        const details = {
+          missing: missing,
+          invalid: invalid,
+          message: `Configuration validation failed: ${missing.length ? 'Missing keys: ' + missing.join(', ') : ''} ${invalid.length ? 'Invalid keys: ' + invalid.join(', ') : ''}`
+        };
+        
+        Logger.error("CONFIG_VALIDATION", "Configuration validation failed", details);
+        return {
+          success: false,
+          details: details
+        };
+      }
+
+      Logger.info("CONFIG_VALIDATION", "Configuration validated successfully");
+      return {
+        success: true,
+        details: {
+          message: "All configurations are valid"
+        }
+      };
+    } catch (error) {
+      Logger.error("CONFIG_VALIDATION", "Error during configuration validation", error);
+      return {
+        success: false,
+        details: {
+          message: "Configuration validation error: " + error.message
+        }
+      };
     }
-
-    return true;
   },
 
   /**
    * Gets nested object value using dot notation
+   * @param {Object} obj - The object to traverse
+   * @param {string} path - Dot-notation path (e.g., 'AZURE.OPENAI.KEY')
+   * @returns {*} The value at the specified path or null if not found
    */
   getNestedValue: function(obj, path) {
-    return path.split('.').reduce((current, key) => 
-      current && current[key] !== undefined ? current[key] : null, obj);
+    try {
+      return path.split('.').reduce((current, key) => {
+        if (current === null || current === undefined) {
+          return null;
+        }
+        const value = current[key];
+        // Check for empty strings or whitespace
+        if (typeof value === 'string' && !value.trim()) {
+          return null;
+        }
+        return value;
+      }, obj);
+    } catch (error) {
+      Logger.error("CONFIG_GET_VALUE", `Error getting nested value for path: ${path}`, error);
+      return null;
+    }
   },
   
   /**
    * Sets nested object value using dot notation
+   * @param {Object} obj - The object to modify
+   * @param {string} path - Dot-notation path (e.g., 'AZURE.OPENAI.KEY')
+   * @param {*} value - The value to set
+   * @returns {Object} The modified object
+   * @throws {Error} If the path is invalid or the operation fails
    */
   setNestedValue: function(obj, path, value) {
-    const parts = path.split('.');
-    const last = parts.pop();
-    const parent = parts.reduce((current, key) => {
-      if (current[key] === undefined) current[key] = {};
-      return current[key];
-    }, obj);
-    
-    parent[last] = value;
-    return obj;
+    try {
+      if (!path || typeof path !== 'string') {
+        throw new Error('Invalid path provided');
+      }
+
+      const parts = path.split('.');
+      if (parts.length === 0) {
+        throw new Error('Empty path provided');
+      }
+
+      const last = parts.pop();
+      const parent = parts.reduce((current, key) => {
+        if (current[key] === undefined) {
+          current[key] = {};
+          Logger.info("CONFIG_SET_VALUE", `Created new object at path: ${key}`);
+        }
+        return current[key];
+      }, obj);
+      
+      // Validate value before setting
+      if (value === undefined || value === null) {
+        Logger.warn("CONFIG_SET_VALUE", `Attempting to set null/undefined value at path: ${path}`);
+      }
+      
+      parent[last] = value;
+      Logger.info("CONFIG_SET_VALUE", `Successfully set value at path: ${path}`);
+      return obj;
+    } catch (error) {
+      Logger.error("CONFIG_SET_VALUE", `Error setting nested value for path: ${path}`, error);
+      throw error;
+    }
   },
 
   /**
-   * Initialize configuration
+   * Initialize configuration with enhanced error handling and validation
+   * @returns {Object} Initialization result with status and details
    */
   initialize: function() {
     try {
-      this.loadSettings();
-      this.validateConfig();
-      this.setupCaching();
-      this.setupMonitoring();
-      return true;
+      Logger.info("CONFIG_INIT", "Starting configuration initialization");
+      
+      // Step 1: Load settings
+      const settingsResult = this.loadSettings();
+      if (!settingsResult.success) {
+        throw new Error(`Failed to load settings: ${settingsResult.message}`);
+      }
+      
+      // Step 2: Validate configuration
+      const validationResult = this.validateConfig();
+      if (!validationResult.success) {
+        throw new Error(`Invalid configuration: ${validationResult.details.message}`);
+      }
+      
+      // Step 3: Setup caching
+      const cacheResult = this.setupCaching();
+      if (!cacheResult.success) {
+        Logger.warn("CONFIG_INIT", "Cache setup failed, continuing without caching", cacheResult.error);
+      }
+      
+      // Step 4: Setup monitoring
+      const monitoringResult = this.setupMonitoring();
+      if (!monitoringResult.success) {
+        Logger.warn("CONFIG_INIT", "Monitoring setup failed, continuing without monitoring", monitoringResult.error);
+      }
+
+      Logger.info("CONFIG_INIT", "Configuration initialized successfully");
+      return {
+        success: true,
+        details: {
+          cacheEnabled: cacheResult.success,
+          monitoringEnabled: monitoringResult.success,
+          timestamp: new Date().toISOString()
+        }
+      };
     } catch (error) {
-      Logger.error('CONFIG_INIT', 'Failed to initialize configuration', error);
-      return false;
+      const errorDetails = {
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      };
+      Logger.error("CONFIG_INIT", "Failed to initialize configuration", errorDetails);
+      return {
+        success: false,
+        details: errorDetails
+      };
     }
   },
   
