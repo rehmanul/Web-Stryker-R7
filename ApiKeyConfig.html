@@ -3,144 +3,174 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Key Configuration - Web Stryker R7</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
   <style>
     body {
-      font-family: 'Roboto', Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      color: #333;
-    }
-    
-    .form-group {
-      margin-bottom: 16px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-    
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    
-    input:focus {
-      border-color: #1976d2;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-    }
-    
-    .helper-text {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
-    }
-    
-    .controls {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 24px;
-    }
-    
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-    
-    .btn-primary {
-      background: #1976d2;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #1565c0;
-    }
-    
-    .btn-secondary {
-      background: #f5f5f5;
-      color: #333;
-    }
-    
-    .btn-secondary:hover {
-      background: #e0e0e0;
-    }
-    
-    .message {
-      padding: 8px;
-      border-radius: 4px;
-      margin-top: 16px;
-      display: none;
-    }
-    
-    .message.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #a5d6a7;
-    }
-    
-    .message.error {
-      background: #ffebee;
-      color: #c62828;
-      border: 1px solid #ef9a9a;
+      font-family: 'Inter', sans-serif;
     }
   </style>
 </head>
-<body>
-  <form id="apiKeyForm">
-    <div class="form-group">
-      <label for="azureOpenaiKey">Azure OpenAI API Key</label>
-      <input type="password" id="azureOpenaiKey" name="AZURE_OPENAI_KEY" required>
-      <div class="helper-text">Required for AI-based data extraction</div>
+
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto p-6">
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-key text-blue-600 mr-2"></i>API Key Configuration
+      </h1>
+      <p class="text-gray-600">Configure your API keys for Web Stryker R7</p>
     </div>
-    
-    <div class="form-group">
-      <label for="azureOpenaiEndpoint">Azure OpenAI Endpoint</label>
-      <input type="text" id="azureOpenaiEndpoint" name="AZURE_OPENAI_ENDPOINT" 
-             placeholder="https://your-resource.openai.azure.com/" required>
-      <div class="helper-text">Your Azure OpenAI service endpoint URL</div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+      <form id="apiKeyForm" class="space-y-6">
+        <!-- Azure OpenAI Section -->
+        <div class="border-b border-gray-200 pb-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="fas fa-brain text-purple-600 mr-2"></i>Azure OpenAI Configuration
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="azureOpenaiKey" class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+              <div class="relative">
+                <input type="password" 
+                       id="azureOpenaiKey" 
+                       name="AZURE_OPENAI_KEY" 
+                       class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 pr-10"
+                       required>
+                <button type="button" 
+                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                        onclick="togglePassword('azureOpenaiKey')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-gray-500">Required for AI-based data extraction</p>
+            </div>
+
+            <div>
+              <label for="azureOpenaiEndpoint" class="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+              <input type="text" 
+                     id="azureOpenaiEndpoint" 
+                     name="AZURE_OPENAI_ENDPOINT"
+                     placeholder="https://your-resource.openai.azure.com/"
+                     class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                     required>
+              <p class="mt-1 text-sm text-gray-500">Your Azure OpenAI service endpoint URL</p>
+            </div>
+
+            <div>
+              <label for="azureOpenaiDeployment" class="block text-sm font-medium text-gray-700 mb-1">Deployment Name</label>
+              <input type="text" 
+                     id="azureOpenaiDeployment" 
+                     name="AZURE_OPENAI_DEPLOYMENT"
+                     placeholder="gpt-4-turbo"
+                     class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                     required>
+              <p class="mt-1 text-sm text-gray-500">Your model deployment name</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Azure Bing Section -->
+        <div class="pt-4">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="fas fa-search text-blue-600 mr-2"></i>Azure Bing Search Configuration
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="azureBingKey" class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+              <div class="relative">
+                <input type="password" 
+                       id="azureBingKey" 
+                       name="AZURE_BING_KEY"
+                       class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 pr-10"
+                       required>
+                <button type="button" 
+                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                        onclick="togglePassword('azureBingKey')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-gray-500">Required for web search functionality</p>
+            </div>
+
+            <div>
+              <label for="azureBingEndpoint" class="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+              <input type="text" 
+                     id="azureBingEndpoint" 
+                     name="AZURE_BING_ENDPOINT"
+                     value="https://api.bing.microsoft.com/v7.0/search"
+                     class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                     required>
+              <p class="mt-1 text-sm text-gray-500">Bing Search API endpoint URL</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="message" class="hidden rounded-lg p-4 mt-4 text-sm"></div>
+
+        <!-- Form Controls -->
+        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button type="button" 
+                  onclick="google.script.host.close()" 
+                  class="px-4 py-2 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-150">
+            <i class="fas fa-times mr-2"></i>Cancel
+          </button>
+          <button type="submit" 
+                  class="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150">
+            <i class="fas fa-save mr-2"></i>Save API Keys
+          </button>
+        </div>
+      </form>
     </div>
-    
-    <div class="form-group">
-      <label for="azureOpenaiDeployment">Azure OpenAI Deployment</label>
-      <input type="text" id="azureOpenaiDeployment" name="AZURE_OPENAI_DEPLOYMENT" 
-             placeholder="gpt-4-turbo" required>
-      <div class="helper-text">Your model deployment name</div>
-    </div>
-    
-    <div class="form-group">
-      <label for="azureBingKey">Azure Bing Search API Key</label>
-      <input type="password" id="azureBingKey" name="AZURE_BING_KEY" required>
-      <div class="helper-text">Required for web search functionality</div>
-    </div>
-    
-    <div class="form-group">
-      <label for="azureBingEndpoint">Azure Bing Search Endpoint</label>
-      <input type="text" id="azureBingEndpoint" name="AZURE_BING_ENDPOINT" 
-             value="https://api.bing.microsoft.com/v7.0/search" required>
-      <div class="helper-text">Bing Search API endpoint URL</div>
-    </div>
-    
-    <div id="message" class="message"></div>
-    
-    <div class="controls">
-      <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">Cancel</button>
-      <button type="submit" class="btn btn-primary">Save API Keys</button>
-    </div>
-  </form>
+  </div>
 
   <script>
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const icon = input.nextElementSibling.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Show status message
+    function showMessage(type, text) {
+      const messageEl = document.getElementById('message');
+      messageEl.classList.remove('hidden', 'bg-green-50', 'text-green-800', 'bg-red-50', 'text-red-800');
+      
+      if (type === 'success') {
+        messageEl.classList.add('bg-green-50', 'text-green-800');
+        messageEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + text;
+      } else {
+        messageEl.classList.add('bg-red-50', 'text-red-800');
+        messageEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>' + text;
+      }
+      
+      messageEl.classList.remove('hidden');
+    }
+
     // Load current values
     google.script.run
       .withSuccessHandler(function(values) {
@@ -167,8 +197,10 @@
       e.preventDefault();
       
       const submitBtn = this.querySelector('button[type="submit"]');
+      const originalContent = submitBtn.innerHTML;
+      
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Saving...';
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
       
       const formData = {
         AZURE_OPENAI_KEY: document.getElementById('azureOpenaiKey').value,
@@ -181,32 +213,23 @@
       google.script.run
         .withSuccessHandler(function(result) {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Save API Keys';
-          
-          const messageEl = document.getElementById('message');
-          messageEl.style.display = 'block';
+          submitBtn.innerHTML = originalContent;
           
           if (result.success) {
-            messageEl.className = 'message success';
-            messageEl.textContent = 'API keys saved successfully!';
+            showMessage('success', 'API keys saved successfully!');
             
             // Close dialog after delay
             setTimeout(function() {
               google.script.host.close();
             }, 2000);
           } else {
-            messageEl.className = 'message error';
-            messageEl.textContent = result.message || 'Failed to save API keys';
+            showMessage('error', result.message || 'Failed to save API keys');
           }
         })
         .withFailureHandler(function(error) {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Save API Keys';
-          
-          const messageEl = document.getElementById('message');
-          messageEl.style.display = 'block';
-          messageEl.className = 'message error';
-          messageEl.textContent = 'Error: ' + (error.message || error);
+          submitBtn.innerHTML = originalContent;
+          showMessage('error', 'Error: ' + (error.message || error));
         })
         .saveScriptProperties(formData);
     });
