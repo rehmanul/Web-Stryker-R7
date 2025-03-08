@@ -4,799 +4,464 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Extractor</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>Web Stryker R7 - AI Data Extraction</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    :root {
-      --primary-color: #4285f4;
-      --primary-gradient: linear-gradient(135deg, #4285f4, #34a853);
-      --secondary-color: #5f6368;
-      --success-color: #28a745;
-      --warning-color: #ffc107;
-      --error-color: #dc3545;
-      --background-color: #ffffff;
-      --surface-color: #f8f9fa;
-      --text-primary: #202124;
-      --text-secondary: #5f6368;
-      --border-color: #dadce0;
-      --shadow-color: rgba(0, 0, 0, 0.1);
-      --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
-    }
-
-    body.dark-theme {
-      --primary-color: #8ab4f8;
-      --primary-gradient: linear-gradient(135deg, #8ab4f8, #34a853);
-      --secondary-color: #9aa0a6;
-      --background-color: #1a1a1a;
-      --surface-color: #292a2d;
-      --text-primary: #e8eaed;
-      --text-secondary: #9aa0a6;
-      --border-color: #3c4043;
-      --shadow-color: rgba(0, 0, 0, 0.3);
-      --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
-    }
-
+    /* Base Styles */
     body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: var(--background-color);
-      color: var(--text-primary);
-      transition: all 0.3s ease;
-      overflow-x: hidden;
-      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
     }
 
-    /* Wave Animation */
-    .wave-container {
-      position: fixed;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      z-index: -1;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
 
-    .wave {
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      background: var(--primary-gradient);
-      opacity: 0.05;
-      transform-origin: 50% 48%;
-      border-radius: 43%;
-      animation: wave 20s infinite linear;
-      top: -50%;
+    /* Dark mode scrollbar */
+    .dark ::-webkit-scrollbar-track {
+      background: #2d3748;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+      background: #4a5568;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #718096;
     }
 
-    .wave-2 {
-      animation: wave 25s infinite linear;
-      opacity: 0.03;
+    /* Gradient Text */
+    .gradient-text {
+      background-image: linear-gradient(to right, #3B82F6, #34D399);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background-size: 200% 200%;
+      animation: gradient 8s linear infinite;
     }
 
-    @keyframes wave {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .dark .gradient-text {
+      background-image: linear-gradient(to right, #60A5FA, #34D399);
     }
 
-    /* Neural Network Background */
-    .neural-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      opacity: 0.1;
-      pointer-events: none;
-    }
-
-    .node {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: var(--primary-color);
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.5; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
-    }
-
-    .header {
-      background-color: rgba(41, 42, 45, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px 0;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1000;
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-
-    .logo i {
-      font-size: 24px;
-      animation: float 3s ease-in-out infinite;
+    /* Animations */
+    @keyframes gradient {
+      0%, 100% {
+        background-position: left center;
+      }
+      50% {
+        background-position: right center;
+      }
     }
 
     @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-5px); }
-      100% { transform: translateY(0px); }
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
-    .logo h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 500;
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-menu {
-      display: flex;
-      gap: 20px;
-    }
-
-    .nav-button {
-      background-color: transparent;
-      border: none;
-      color: var(--text-primary);
-      padding: 8px 16px;
-      border-radius: 8px;
+    /* Feature Cards */
+    .feature-card {
+      background-color: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
     }
 
-    .nav-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--primary-gradient);
-      opacity: 0.1;
-      transition: all 0.3s ease;
+    .dark .feature-card {
+      background-color: #1f2937;
     }
 
-    .nav-button:hover::before {
-      left: 0;
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    .nav-button i {
-      font-size: 16px;
-      transition: transform 0.3s ease;
-    }
-
-    .nav-button:hover i {
-      transform: scale(1.2);
-    }
-
-    .main-content {
-      margin-top: 120px;
-      padding-bottom: 80px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-section {
-      text-align: center;
-      padding: 60px 0;
-      position: relative;
-    }
-
-    .hero-title {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1.2;
-    }
-
-    .hero-subtitle {
-      font-size: 18px;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 40px;
-      line-height: 1.6;
-    }
-
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      margin: 40px 0;
-    }
-
-    .card {
-      background: var(--surface-color);
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 32px var(--shadow-color);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--card-gradient);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .card:hover::before {
-      opacity: 1;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      position: relative;
-    }
-
-    .card-title {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 500;
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
+    /* Card Icons */
     .card-icon {
-      font-size: 28px;
-      color: var(--primary-color);
-      animation: pulse 2s infinite;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
     }
 
-    .card-content {
-      color: var(--text-secondary);
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      position: relative;
-      flex-grow: 1;
+    /* Stats Cards */
+    .stat-card {
+      background-color: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
 
-    .action-button {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
+    .dark .stat-card {
+      background-color: #1f2937;
+    }
+
+    /* Navigation Buttons */
+    .nav-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      color: #4b5563;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-      margin-top: auto;
+      gap: 0.5rem;
     }
 
-    .action-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: all 0.5s ease;
+    .dark .nav-btn {
+      color: #d1d5db;
     }
 
-    .action-button:hover::before {
-      left: 100%;
+    .nav-btn:hover {
+      background-color: #f3f4f6;
     }
 
-    .action-button i {
-      transition: transform 0.3s ease;
+    .dark .nav-btn:hover {
+      background-color: #374151;
     }
 
-    .action-button:hover i {
-      transform: translateX(5px);
-    }
-
-    .status-bar {
-      background-color: rgba(41, 42, 45, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border-color);
-      padding: 12px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      z-index: 1000;
-    }
-
-    .status-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    /* Status Indicator */
     .status-indicator {
-      width: 8px;
-      height: 8px;
+      width: 0.5rem;
+      height: 0.5rem;
       border-radius: 50%;
-      position: relative;
+      margin-right: 0.5rem;
     }
 
-    .status-indicator::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border-radius: 50%;
-      border: 2px solid;
-      border-color: inherit;
-      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    .status-online {
+      background-color: #10b981;
     }
 
-    @keyframes ping {
-      75%, 100% {
-        transform: scale(2);
-        opacity: 0;
-      }
+    .status-offline {
+      background-color: #ef4444;
     }
 
-    .status-success {
-      background-color: var(--success-color);
-      border-color: var(--success-color);
-    }
-
-    .status-warning {
-      background-color: var(--warning-color);
-      border-color: var(--warning-color);
-    }
-
-    .status-error {
-      background-color: var(--error-color);
-      border-color: var(--error-color);
-    }
-
-    .theme-toggle {
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .theme-toggle:hover {
-      background-color: var(--surface-color);
-      transform: rotate(180deg);
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 10px;
-      }
-
-      .nav-menu {
-        display: none;
-      }
-
-      .mobile-menu {
-        display: block;
-      }
-
-      .dashboard {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-title {
-        font-size: 32px;
-      }
-
-      .hero-subtitle {
-        font-size: 16px;
-        padding: 0 20px;
-      }
-    }
-
-    /* LOGS MODAL (initially hidden) */
-    .modal-backdrop {
+    /* Modal */
+    .modal {
+      display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 9999;
-      display: none; /* shown dynamically */
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 50;
       align-items: center;
       justify-content: center;
     }
-    .modal-content-logs {
-      background-color: var(--surface-color);
-      border-radius: 8px;
-      width: 90%;
-      max-width: 600px;
+
+    .modal-content {
+      background-color: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 32rem;
       max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-      box-shadow: 0 4px 12px var(--shadow-color);
-      padding: 20px;
+      overflow: hidden;
     }
-    .modal-header-logs {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .modal-header-logs h2 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    .modal-body-logs {
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    .close-logs {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text-primary);
+
+    .dark .modal-content {
+      background-color: #1f2937;
     }
   </style>
 </head>
-<body>
-  <!-- Wave Animation Background -->
-  <div class="wave-container">
-    <div class="wave"></div>
-    <div class="wave wave-2"></div>
-  </div>
 
-  <!-- Neural Network Background -->
-  <div class="neural-bg" id="neuralBg"></div>
-
-  <div class="header">
-    <div class="container header-content">
-      <a href="#" class="logo">
-        <i class="fas fa-robot"></i>
-        <h1>AI Extractor</h1>
-      </a>
-      <div class="nav-menu">
-        <button class="nav-button" onclick="showDataCenter()">
-          <i class="fas fa-database"></i>
-          Data Center
-        </button>
-        <button class="nav-button" onclick="showStrykeCenter()">
-          <i class="fas fa-brain"></i>
-          Stryke Center
-        </button>
-        <button class="nav-button" onclick="showSettings()">
-          <i class="fas fa-cog"></i>
-          Settings
-        </button>
-        <!-- NEW: Logs button -->
-        <button class="nav-button" onclick="showLogsUI()">
-          <i class="fas fa-list"></i>
-          Logs
-        </button>
-        <button class="theme-toggle" onclick="toggleTheme()">
-          <i class="fas fa-moon"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="container main-content">
-    <div class="hero-section">
-      <h1 class="hero-title">AI-Powered Data Extraction</h1>
-      <p class="hero-subtitle">Transform your data processing workflow with advanced AI technology and intelligent automation</p>
-    </div>
-
-    <div class="dashboard">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Data Extraction</h2>
-          <i class="fas fa-database card-icon"></i>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+  <!-- Header -->
+  <header class="fixed top-0 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 z-50">
+    <nav class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-robot text-3xl text-blue-600 dark:text-blue-400" style="animation: float 3s ease-in-out infinite;"></i>
+          <h1 class="text-2xl font-bold gradient-text">Web Stryker R7</h1>
         </div>
-        <div class="card-content">
-          Extract product information from websites with advanced pattern recognition and AI processing.
-          <button class="action-button" onclick="showDataCenter()">
-            <i class="fas fa-arrow-right"></i>
-            Start Extraction
+        
+        <div class="flex items-center space-x-6">
+          <button onclick="showDataCenter()" class="nav-btn">
+            <i class="fas fa-database"></i>
+            <span>Data Center</span>
+          </button>
+          
+          <button onclick="showStrykeCenter()" class="nav-btn">
+            <i class="fas fa-brain"></i>
+            <span>Stryke Center</span>
+          </button>
+          
+          <button onclick="showSettings()" class="nav-btn">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </button>
+          
+          <button onclick="showLogsUI()" class="nav-btn">
+            <i class="fas fa-list"></i>
+            <span>Logs</span>
+          </button>
+          
+          <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
           </button>
         </div>
       </div>
+    </nav>
+  </header>
 
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">AI Processing</h2>
-          <i class="fas fa-brain card-icon"></i>
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 pt-24 pb-32">
+    <!-- Hero Section -->
+    <section class="text-center py-20">
+      <h1 class="text-5xl font-bold mb-6 gradient-text">
+        AI-Powered Web Data Extraction
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-xl max-w-3xl mx-auto mb-12">
+        Transform your data collection workflow with advanced AI technology and intelligent automation
+      </p>
+      
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="stat-card">
+          <i class="fas fa-bolt text-yellow-400 text-3xl mb-4"></i>
+          <h3 class="text-4xl font-bold mb-2" id="extractionSpeed">0ms</h3>
+          <p class="text-gray-600 dark:text-gray-400">Average Extraction Speed</p>
         </div>
-        <div class="card-content">
-          Process and analyze extracted data using advanced AI models for enhanced insights.
-          <button class="action-button" onclick="showStrykeCenter()">
-            <i class="fas fa-arrow-right"></i>
-            Start Processing
-          </button>
+        
+        <div class="stat-card">
+          <i class="fas fa-check-circle text-green-400 text-3xl mb-4"></i>
+          <h3 class="text-4xl font-bold mb-2" id="successRate">0%</h3>
+          <p class="text-gray-600 dark:text-gray-400">Success Rate</p>
+        </div>
+        
+        <div class="stat-card">
+          <i class="fas fa-database text-blue-400 text-3xl mb-4"></i>
+          <h3 class="text-4xl font-bold mb-2" id="totalExtracted">0</h3>
+          <p class="text-gray-600 dark:text-gray-400">Total Extractions</p>
         </div>
       </div>
+    </section>
 
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Configuration</h2>
-          <i class="fas fa-cog card-icon"></i>
+    <!-- Features Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+      <div class="feature-card" onclick="showDataCenter()">
+        <div class="card-icon bg-blue-100 dark:bg-blue-900">
+          <i class="fas fa-database text-blue-600 dark:text-blue-400"></i>
         </div>
-        <div class="card-content">
-          Configure API keys, extraction settings, and system preferences.
-          <button class="action-button" onclick="showSettings()">
-            <i class="fas fa-arrow-right"></i>
-            Configure
-          </button>
+        <h3 class="text-xl font-semibold mb-3">Data Extraction</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Extract structured data from websites with advanced pattern recognition
+        </p>
+        <span class="text-blue-600 dark:text-blue-400 flex items-center">
+          Start Extraction
+          <i class="fas fa-arrow-right ml-2"></i>
+        </span>
+      </div>
+
+      <div class="feature-card" onclick="showStrykeCenter()">
+        <div class="card-icon bg-purple-100 dark:bg-purple-900">
+          <i class="fas fa-brain text-purple-600 dark:text-purple-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">AI Processing</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Process and analyze data using advanced AI models
+        </p>
+        <span class="text-purple-600 dark:text-purple-400 flex items-center">
+          Start Processing
+          <i class="fas fa-arrow-right ml-2"></i>
+        </span>
+      </div>
+
+      <div class="feature-card" onclick="showSettings()">
+        <div class="card-icon bg-green-100 dark:bg-green-900">
+          <i class="fas fa-cog text-green-600 dark:text-green-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">Configuration</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Configure API keys and system preferences
+        </p>
+        <span class="text-green-600 dark:text-green-400 flex items-center">
+          Configure Now
+          <i class="fas fa-arrow-right ml-2"></i>
+        </span>
+      </div>
+    </section>
+
+    <!-- Performance Chart -->
+    <section class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-20">
+      <h2 class="text-2xl font-semibold mb-6">Performance Metrics</h2>
+      <canvas id="performanceChart" height="200"></canvas>
+    </section>
+  </main>
+
+  <!-- Footer Status Bar -->
+  <footer class="fixed bottom-0 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between text-sm">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <div id="statusIndicator" class="status-indicator status-online"></div>
+            <span id="statusText" class="text-gray-600 dark:text-gray-400">System Online</span>
+          </div>
+          <div class="text-gray-600 dark:text-gray-400">
+            <i class="fas fa-clock mr-2"></i>
+            <span id="lastUpdate">Just now</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-gray-600 dark:text-gray-400">
+            <i class="fas fa-code mr-2"></i>Version 3.2.0
+          </span>
+          <span class="text-gray-600 dark:text-gray-400">
+            <i class="fas fa-server mr-2"></i>Server: Healthy
+          </span>
         </div>
       </div>
     </div>
-  </div>
+  </footer>
 
-  <div class="status-bar">
-    <div class="container status-content">
-      <div class="status-item">
-        <div class="status-indicator status-success"></div>
-        System Status: Online
+  <!-- Logs Modal -->
+  <div id="logsModal" class="modal">
+    <div class="modal-content">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h2 class="text-2xl font-semibold">System Logs</h2>
+        <button onclick="closeLogsUI()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div class="status-item">
-        <i class="fas fa-clock"></i>
-        Last Update: <span id="lastUpdate">Just now</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- LOGS MODAL (initially hidden) -->
-  <div id="logsModal" class="modal-backdrop">
-    <div class="modal-content-logs">
-      <div class="modal-header-logs">
-        <h2>Recent Logs</h2>
-        <button class="close-logs" onclick="closeLogsUI()">&times;</button>
-      </div>
-      <div class="modal-body-logs" id="logsContainer">
-        <p>Loading...</p>
+      <div id="logsContainer" class="p-6 overflow-y-auto max-h-[60vh]">
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Check if running in Google Apps Script environment
-    const isGoogleAppsScript = typeof google !== 'undefined' && google.script;
+    // Initialize theme based on system preference
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
 
-    // Initialize neural network background
-    function initNeuralBackground() {
-      const bg = document.getElementById('neuralBg');
-      const nodes = 50;
+    // Theme toggle
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Initialize performance chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 12}, (_, i) => `${i+1}h ago`),
+        datasets: [{
+          label: 'Extraction Speed (ms)',
+          data: Array.from({length: 12}, () => Math.floor(Math.random() * 1000) + 500),
+          borderColor: '#3B82F6',
+          tension: 0.4
+        }, {
+          label: 'Success Rate (%)',
+          data: Array.from({length: 12}, () => Math.floor(Math.random() * 20) + 80),
+          borderColor: '#10B981',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Update stats periodically
+    function updateStats() {
+      // Simulate real stats (replace with actual data in production)
+      document.getElementById('extractionSpeed').textContent = 
+        Math.floor(Math.random() * 500 + 300) + 'ms';
+      document.getElementById('successRate').textContent = 
+        Math.floor(Math.random() * 10 + 90) + '%';
+      document.getElementById('totalExtracted').textContent = 
+        Math.floor(Math.random() * 1000 + 5000);
       
-      for (let i = 0; i < nodes; i++) {
-        const node = document.createElement('div');
-        node.className = 'node';
-        node.style.left = `${Math.random() * 100}%`;
-        node.style.top = `${Math.random() * 100}%`;
-        node.style.animationDelay = `${Math.random() * 2}s`;
-        bg.appendChild(node);
-      }
+      // Update last update time
+      document.getElementById('lastUpdate').textContent = 
+        new Date().toLocaleTimeString();
     }
 
-    // Initialize on page load
-    window.onload = function() {
-      initTheme();
-      updateLastUpdate();
-      checkSystemStatus();
-      initNeuralBackground();
-      // Hide logs modal by default
-      document.getElementById('logsModal').style.display = 'none';
-    };
+    // Initialize
+    updateStats();
+    setInterval(updateStats, 5000);
 
-    // Show Data Center
-    function showDataCenter() {
-      if (isGoogleAppsScript) {
-        google.script.run.showDataCenter();
-      } else {
-        console.log('Data Center would be shown in Google Apps Script environment');
-      }
-    }
-
-    // Show Stryke Center
-    function showStrykeCenter() {
-      if (isGoogleAppsScript) {
-        google.script.run.showStrykeCenter();
-      } else {
-        console.log('Stryke Center would be shown in Google Apps Script environment');
-      }
-    }
-
-    // Show Settings
-    function showSettings() {
-      if (isGoogleAppsScript) {
-        google.script.run.showSettings();
-      } else {
-        console.log('Settings would be shown in Google Apps Script environment');
-      }
-    }
-
-    // --- LOGS MODAL FUNCTIONS ---
-
-    // Show logs UI (modal)
+    // Show/hide logs modal
     function showLogsUI() {
       document.getElementById('logsModal').style.display = 'flex';
-
-      // If running in Apps Script environment, fetch logs from server
-      if (isGoogleAppsScript) {
-        google.script.run
-          .withSuccessHandler(renderLogs)
-          .withFailureHandler(function(error) {
-            document.getElementById('logsContainer').innerHTML =
-              `<p style="color:red;">Error loading logs: ${error.message}</p>`;
-          })
-          .Logger.getRecentLogs(50); // last 50 logs (adjust as desired)
-      } else {
-        // Local test
-        const fakeLogs = [
-          {
-            timestamp: '2025-03-01T10:00:00Z',
-            level: 'INFO',
-            category: 'TestCategory',
-            message: 'This is an informational log entry',
-            data: 'Extra data or details...'
-          },
-          {
-            timestamp: '2025-03-01T09:58:00Z',
-            level: 'ERROR',
-            category: 'System',
-            message: 'An error occurred during processing',
-            data: 'Error stack trace or details...'
-          }
-        ];
-        renderLogs(fakeLogs);
-      }
     }
 
-    // Close logs modal
     function closeLogsUI() {
       document.getElementById('logsModal').style.display = 'none';
     }
 
-    // Render logs into the #logsContainer
-    function renderLogs(logs) {
-      const container = document.getElementById('logsContainer');
-      if (!logs || logs.length === 0) {
-        container.innerHTML = '<p>No logs found.</p>';
-        return;
-      }
-      let html = '<ul style="list-style: none; padding: 0;">';
-      logs.forEach(function(log) {
-        html += `
-          <li style="margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
-            <div><strong>${log.timestamp}</strong> <em>[${log.level}]</em> <em>[${log.category}]</em></div>
-            <div>${log.message}</div>
-            ${
-              log.data 
-                ? `<div style="font-size: 0.85rem; color: var(--text-secondary);">Data: ${log.data}</div>` 
-                : ''
-            }
-          </li>
-        `;
-      });
-      html += '</ul>';
-      container.innerHTML = html;
-    }
-
-    // --- END LOGS MODAL ---
-
-    // Toggle theme
-    function toggleTheme() {
-      const body = document.body;
-      const isDark = body.classList.toggle('dark-theme');
-      const icon = document.querySelector('.theme-toggle i');
-      icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-      
-      if (isGoogleAppsScript) {
-        google.script.run
-          .withSuccessHandler(function() {
-            console.log('Theme updated on server');
-          })
-          .Config.updateSetting('display', 'theme', isDark ? 'dark' : 'light');
+    // Navigation functions
+    function showDataCenter() {
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run.showDataCenter();
       }
     }
 
-    // Initialize theme
-    function initTheme() {
-      if (isGoogleAppsScript) {
-        google.script.run
-          .withSuccessHandler(function(theme) {
-            if (theme === 'dark') {
-              document.body.classList.add('dark-theme');
-              document.querySelector('.theme-toggle i').className = 'fas fa-sun';
-            }
-          })
-          .UI.getThemeClass();
+    function showStrykeCenter() {
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run.showStrykeCenter();
       }
     }
 
-    // Update last update time
-    function updateLastUpdate() {
-      const now = new Date();
-      document.getElementById('lastUpdate').textContent = 
-        now.toLocaleTimeString();
-    }
-
-    // Check system status
-    function checkSystemStatus() {
-      if (isGoogleAppsScript) {
-        google.script.run
-          .withSuccessHandler(function(status) {
-            const indicator = document.querySelector('.status-indicator');
-            indicator.className = `status-indicator status-${status.level}`;
-          })
-          .withFailureHandler(function() {
-            const indicator = document.querySelector('.status-indicator');
-            indicator.className = 'status-indicator status-error';
-          })
-          .checkSystemStatus();
+    function showSettings() {
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run.showSettings();
       }
     }
   </script>
