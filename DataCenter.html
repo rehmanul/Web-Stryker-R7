@@ -3,313 +3,437 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Center - Web Stryker R7</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 16px;
-      color: #333;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
     
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    
-    .panel {
-      background: white;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .panel-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: #1976d2;
-    }
-    
-    .form-group {
-      margin-bottom: 16px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-    
-    select, textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
       border-radius: 4px;
-      font-size: 14px;
-      font-family: inherit;
     }
     
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-    
-    .extraction-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    
-    .option-pill {
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      padding: 4px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .option-pill.active {
-      background: #1976d2;
-      color: white;
-      border-color: #1976d2;
-    }
-    
-    .preview-panel {
-      background: #f8f9fa;
+    ::-webkit-scrollbar-thumb {
+      background: #888;
       border-radius: 4px;
-      padding: 16px;
-      min-height: 200px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      font-size: 14px;
     }
     
-    .action-button {
-      background: #1976d2;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    .dark ::-webkit-scrollbar-track {
+      background: #2d3748;
     }
     
-    .action-button:hover {
-      background: #1565c0;
+    .dark ::-webkit-scrollbar-thumb {
+      background: #4a5568;
     }
     
-    .action-button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #718096;
     }
-    
-    .action-button i {
-      font-size: 16px;
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
-    
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    
-    .message {
-      padding: 8px 16px;
-      border-radius: 4px;
-      margin-top: 16px;
-      display: none;
-    }
-    
-    .message.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    
-    .message.error {
-      background: #ffebee;
-      color: #c62828;
-    }
-    
-    .loader {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s linear infinite;
-    }
-    
+
     @keyframes spin {
+      from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    .animate-pulse {
+      animation: pulse 2s infinite;
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="panel">
-      <h2 class="panel-title">Data Source</h2>
-      
-      <div class="form-group">
-        <label for="sourceType">Source Type</label>
-        <select id="sourceType">
-          <option value="url">Website URL</option>
-          <option value="text">Raw Text</option>
-          <option value="spreadsheet">Spreadsheet</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="sourceInput">Source Input</label>
-        <textarea id="sourceInput" placeholder="Enter URL, text, or reference"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label>Extraction Profile</label>
-        <div class="extraction-options">
-          <div class="option-pill active" data-profile="product">
-            <i class="fas fa-box"></i> Product Data
-          </div>
-          <div class="option-pill" data-profile="nutrition">
-            <i class="fas fa-apple-alt"></i> Nutritional Info
-          </div>
-          <div class="option-pill" data-profile="compliance">
-            <i class="fas fa-shield-alt"></i> Compliance
-          </div>
-          <div class="option-pill" data-profile="market">
-            <i class="fas fa-chart-line"></i> Market Analysis
-          </div>
+
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-database text-blue-600 dark:text-blue-400 text-2xl"></i>
+          <h1 class="text-xl font-semibold">Data Center</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span id="statusIndicator" class="flex items-center">
+            <i class="fas fa-circle text-green-500 mr-2"></i>
+            <span>Ready</span>
+          </span>
+          <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+          </button>
         </div>
       </div>
-      
-      <div id="message" class="message"></div>
     </div>
-    
-    <div class="panel">
-      <h2 class="panel-title">Preview</h2>
-      <div id="previewPanel" class="preview-panel">
-        Extraction preview will appear here.
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- URL Input Section -->
+    <section class="mb-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Enter URLs for Extraction</h2>
+        
+        <div class="mb-4">
+          <textarea id="urlInput" 
+                    rows="5" 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter URLs (one per line)"></textarea>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button onclick="loadSampleUrls()" class="btn-secondary">
+              <i class="fas fa-list mr-2"></i>Load Sample URLs
+            </button>
+            <button onclick="clearUrls()" class="btn-secondary">
+              <i class="fas fa-trash mr-2"></i>Clear
+            </button>
+          </div>
+          
+          <button onclick="startExtraction()" id="extractButton" class="btn-primary">
+            <i class="fas fa-play mr-2"></i>Start Extraction
+          </button>
+        </div>
       </div>
-      
-      <div class="actions">
-        <button id="previewBtn" class="action-button">
-          <i class="fas fa-eye"></i> Preview
+    </section>
+
+    <!-- Progress Section -->
+    <section class="mb-8 hidden" id="progressSection">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Extraction Progress</h2>
+        
+        <div class="mb-4">
+          <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div id="progressBar" 
+                 class="h-2 bg-blue-600 rounded-full transition-all duration-300" 
+                 style="width: 0%"></div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div class="stat-card">
+            <div class="text-sm text-gray-600 dark:text-gray-400">Processed</div>
+            <div class="text-2xl font-semibold"><span id="processedCount">0</span>/<span id="totalCount">0</span></div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="text-sm text-gray-600 dark:text-gray-400">Success Rate</div>
+            <div class="text-2xl font-semibold text-green-600 dark:text-green-400" id="successRate">0%</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="text-sm text-gray-600 dark:text-gray-400">Average Time</div>
+            <div class="text-2xl font-semibold" id="avgTime">0ms</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="text-sm text-gray-600 dark:text-gray-400">Estimated Time</div>
+            <div class="text-2xl font-semibold" id="eta">--:--</div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end">
+          <button onclick="stopExtraction()" id="stopButton" class="btn-danger">
+            <i class="fas fa-stop mr-2"></i>Stop
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="mb-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">Extraction Results</h2>
+          <div class="flex items-center space-x-4">
+            <button onclick="exportResults()" class="btn-secondary">
+              <i class="fas fa-download mr-2"></i>Export
+            </button>
+            <button onclick="clearResults()" class="btn-secondary">
+              <i class="fas fa-trash mr-2"></i>Clear
+            </button>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">URL</th>
+                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Company</th>
+                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Products</th>
+                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <!-- Results will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Extraction Details</h2>
+        <button onclick="closeDetailModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <i class="fas fa-times"></i>
         </button>
-        <button id="extractBtn" class="action-button">
-          <i class="fas fa-download"></i> Extract Data
-        </button>
+      </div>
+      <div class="p-6 overflow-y-auto" id="detailContent">
+        <!-- Detail content will be inserted here -->
       </div>
     </div>
   </div>
-  
+
   <script>
+    // Sample URLs
+    const sampleUrls = [
+      'http://www.mancusogelati.it',
+      'https://www.linkosuo.fi/',
+      'https://thealphatrader.co/',
+      'https://www.goldandgreenfoods.com/',
+      'https://www.atriafromfinland.com/',
+      'https://www.evoke.fi/',
+      'https://www.raisio.com/',
+      'https://www.moilas.com/',
+      'https://www.qdb.qa/',
+      'https://gea.si/',
+      'https://www.quinuasaite.com.bo/',
+      'https://www.spiritslovenia.si/',
+      'https://www.yvayafarm.com/'
+    ];
+
+    // Load sample URLs
+    function loadSampleUrls() {
+      document.getElementById('urlInput').value = sampleUrls.join('\n');
+    }
+
+    // Clear URL input
+    function clearUrls() {
+      document.getElementById('urlInput').value = '';
+    }
+
+    // Start extraction process
+    function startExtraction() {
+      const urls = document.getElementById('urlInput').value
+        .split('\n')
+        .map(url => url.trim())
+        .filter(url => url);
+
+      if (urls.length === 0) {
+        alert('Please enter at least one URL');
+        return;
+      }
+
+      // Show progress section
+      document.getElementById('progressSection').classList.remove('hidden');
+      document.getElementById('totalCount').textContent = urls.length;
+      
+      // Disable start button
+      document.getElementById('extractButton').disabled = true;
+      
+      // Start extraction using Google Apps Script
+      google.script.run
+        .withSuccessHandler(onExtractionComplete)
+        .withFailureHandler(onExtractionError)
+        .startExtraction(urls);
+    }
+
+    // Handle extraction completion
+    function onExtractionComplete(results) {
+      document.getElementById('extractButton').disabled = false;
+      document.getElementById('progressSection').classList.add('hidden');
+      
+      // Update results table
+      updateResultsTable(results);
+    }
+
+    // Handle extraction error
+    function onExtractionError(error) {
+      document.getElementById('extractButton').disabled = false;
+      document.getElementById('progressSection').classList.add('hidden');
+      
+      alert('Error during extraction: ' + error.message);
+    }
+
+    // Update results table
+    function updateResultsTable(results) {
+      const tbody = document.getElementById('resultsTable');
+      tbody.innerHTML = '';
+
+      results.forEach(result => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <a href="${result.url}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">${result.url}</a>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 rounded-full text-xs ${
+              result.success 
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            }">
+              ${result.success ? 'Success' : 'Failed'}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            ${result.data?.companyName || '-'}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            ${result.data?.productNames?.length || 0} products
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <button onclick="showDetails('${result.url}')" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+              <i class="fas fa-eye mr-1"></i>Details
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Show extraction details
+    function showDetails(url) {
+      google.script.run
+        .withSuccessHandler(showDetailModal)
+        .withFailureHandler(error => alert('Error loading details: ' + error.message))
+        .getExtractionDetails(url);
+    }
+
+    // Show detail modal
+    function showDetailModal(details) {
+      const modal = document.getElementById('detailModal');
+      const content = document.getElementById('detailContent');
+      
+      content.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Company Information</h3>
+            <dl class="space-y-2">
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Name</dt>
+              <dd class="font-medium">${details.companyName || '-'}</dd>
+              
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Type</dt>
+              <dd class="font-medium">${details.companyType || '-'}</dd>
+              
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Description</dt>
+              <dd class="font-medium">${details.description || '-'}</dd>
+            </dl>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+            <dl class="space-y-2">
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Emails</dt>
+              <dd class="font-medium">${details.emails?.join(', ') || '-'}</dd>
+              
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Phones</dt>
+              <dd class="font-medium">${details.phones?.join(', ') || '-'}</dd>
+              
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Addresses</dt>
+              <dd class="font-medium">${details.addresses?.join(', ') || '-'}</dd>
+            </dl>
+          </div>
+          
+          <div class="md:col-span-2">
+            <h3 class="text-lg font-semibold mb-4">Products</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              ${(details.productNames || []).map((name, i) => `
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                  <h4 class="font-medium mb-2">${name}</h4>
+                  ${
+                    details.productImages?.[i]
+                      ? `<img src="${details.productImages[i]}" alt="${name}" class="w-full h-32 object-cover rounded-lg mb-2">`
+                      : ''
+                  }
+                  ${
+                    details.productQuantities?.[i]
+                      ? `<p class="text-sm text-gray-600 dark:text-gray-400">${details.productQuantities[i]}</p>`
+                      : ''
+                  }
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // Close detail modal
+    function closeDetailModal() {
+      const modal = document.getElementById('detailModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Export results
+    function exportResults() {
+      google.script.run
+        .withSuccessHandler(() => alert('Results exported successfully'))
+        .withFailureHandler(error => alert('Error exporting results: ' + error.message))
+        .exportResults();
+    }
+
+    // Clear results
+    function clearResults() {
+      if (confirm('Are you sure you want to clear all results?')) {
+        document.getElementById('resultsTable').innerHTML = '';
+        google.script.run
+          .withFailureHandler(error => alert('Error clearing results: ' + error.message))
+          .clearResults();
+      }
+    }
+
+    // Toggle theme
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-      // Extraction profile selection
-      document.querySelectorAll('.option-pill').forEach(pill => {
-        pill.addEventListener('click', function() {
-          document.querySelectorAll('.option-pill').forEach(p => p.classList.remove('active'));
-          this.classList.add('active');
-        });
-      });
-      
-      // Preview button
-      document.getElementById('previewBtn').addEventListener('click', function() {
-        const sourceType = document.getElementById('sourceType').value;
-        const sourceInput = document.getElementById('sourceInput').value;
-        const profile = document.querySelector('.option-pill.active').dataset.profile;
-        
-        if (!sourceInput) {
-          showMessage('Please enter a source input', 'error');
-          return;
-        }
-        
-        this.disabled = true;
-        this.innerHTML = '<span class="loader"></span> Previewing...';
-        
-        google.script.run
-          .withSuccessHandler(function(result) {
-            document.getElementById('previewBtn').disabled = false;
-            document.getElementById('previewBtn').innerHTML = '<i class="fas fa-eye"></i> Preview';
-            
-            if (result.success) {
-              document.getElementById('previewPanel').textContent = 
-                JSON.stringify(result.data, null, 2);
-            } else {
-              showMessage(result.message || 'Preview failed', 'error');
-            }
-          })
-          .withFailureHandler(function(error) {
-            document.getElementById('previewBtn').disabled = false;
-            document.getElementById('previewBtn').innerHTML = '<i class="fas fa-eye"></i> Preview';
-            showMessage('Error: ' + error.message, 'error');
-          })
-          .previewExtraction(sourceType, sourceInput, profile);
-      });
-      
-      // Extract button
-      document.getElementById('extractBtn').addEventListener('click', function() {
-        const sourceType = document.getElementById('sourceType').value;
-        const sourceInput = document.getElementById('sourceInput').value;
-        const profile = document.querySelector('.option-pill.active').dataset.profile;
-        
-        if (!sourceInput) {
-          showMessage('Please enter a source input', 'error');
-          return;
-        }
-        
-        this.disabled = true;
-        this.innerHTML = '<span class="loader"></span> Extracting...';
-        
-        google.script.run
-          .withSuccessHandler(function(result) {
-            document.getElementById('extractBtn').disabled = false;
-            document.getElementById('extractBtn').innerHTML = '<i class="fas fa-download"></i> Extract Data';
-            
-            if (result.success) {
-              showMessage('Data extracted successfully!', 'success');
-              // Close dialog after delay
-              setTimeout(function() {
-                google.script.host.close();
-              }, 2000);
-            } else {
-              showMessage(result.message || 'Extraction failed', 'error');
-            }
-          })
-          .withFailureHandler(function(error) {
-            document.getElementById('extractBtn').disabled = false;
-            document.getElementById('extractBtn').innerHTML = '<i class="fas fa-download"></i> Extract Data';
-            showMessage('Error: ' + error.message, 'error');
-          })
-          .startExtraction(sourceType, sourceInput, profile);
-      });
+      // Check system dark mode preference
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      }
     });
-    
-    // Show message
-    function showMessage(text, type) {
-      const messageEl = document.getElementById('message');
-      messageEl.textContent = text;
-      messageEl.className = 'message ' + type;
-      messageEl.style.display = 'block';
-      
-      // Hide after 5 seconds
-      setTimeout(function() {
-        messageEl.style.display = 'none';
-      }, 5000);
-    }
   </script>
 </body>
 </html>
