@@ -67,11 +67,6 @@ const ExtractProcessor = {
   },
   
   /**
-   * Validate URL format
-   * @param {string} url - URL to validate
-   * @returns {boolean} Validation result
-   */
-  /**
    * Validate URL format and accessibility
    * @param {string} url - URL to validate
    * @param {boolean} checkAccess - Whether to check URL accessibility
@@ -337,12 +332,6 @@ const ExtractProcessor = {
   },
   
   /**
-   * Extract product information from webpage
-   * @param {string} content - Webpage content
-   * @param {string} url - Source URL
-   * @returns {Object} Extracted product information
-   */
-  /**
    * Extract product information from webpage content
    * @param {string} content - Webpage content
    * @param {string} url - Source URL
@@ -607,11 +596,6 @@ const ExtractProcessor = {
   
   /**
    * Enhance extracted data with AI analysis
-   * @param {Object} data - Extracted data to enhance
-   * @returns {Object} Enhanced data
-   */
-  /**
-   * Enhance extracted data with AI analysis
    * @param {Object} data - Extracted product data to enhance
    * @returns {Promise<Object>} Enhanced data with AI insights
    */
@@ -813,11 +797,6 @@ Format your response as a JSON object that can be merged with the existing data.
     };
   },
   
-  /**
-   * Validate extracted data
-   * @param {Object} data - Data to validate
-   * @throws {Error} Validation error
-   */
   /**
    * Validate extracted data with enhanced error reporting
    * @param {Object} data - Data to validate
@@ -1174,6 +1153,3 @@ Format your response as a JSON object that can be merged with the existing data.
     return validUrls;
   }
 };
-
-// Export the ExtractProcessor
-this.ExtractProcessor = ExtractProcessor;
