@@ -60,8 +60,8 @@
     /* Gradient Text */
     .gradient-text {
       background-image: linear-gradient(to right, #3B82F6, #34D399);
-      background-clip: text;
       -webkit-background-clip: text;
+      background-clip: text;
       color: transparent;
       background-size: 200% 200%;
       animation: gradient 8s linear infinite;
@@ -118,6 +118,11 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 1rem;
+    }
+
+    /* Floating Robot Animation */
+    .floating-robot {
+      animation: float 3s ease-in-out infinite;
     }
 
     /* Stats Cards */
@@ -178,6 +183,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
       z-index: 50;
       align-items: center;
@@ -201,12 +207,12 @@
 </head>
 
 <body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-  <!-- Header -->
+          <i class="fas fa-robot text-3xl text-blue-600 dark:text-blue-400 floating-robot"></i>
   <header class="fixed top-0 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 z-50">
     <nav class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <i class="fas fa-robot text-3xl text-blue-600 dark:text-blue-400" style="animation: float 3s ease-in-out infinite;"></i>
+          <i class="fas fa-robot text-3xl text-blue-600 dark:text-blue-400 floating-robot"></i>
           <h1 class="text-2xl font-bold gradient-text">Web Stryker R7</h1>
         </div>
         
