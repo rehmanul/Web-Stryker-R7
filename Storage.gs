@@ -14,7 +14,7 @@ const Storage = {
   saveToSheet: function(data) {
     try {
       const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const sheet = ss.getSheetByName(CONFIG.SHEETS.DATA);
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.DATA);
       
       if (!sheet) {
         throw new Error('Data sheet not found');
@@ -59,7 +59,7 @@ const Storage = {
   exportToCsv: function(type = 'all') {
     try {
       const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const sheet = ss.getSheetByName(CONFIG.SHEETS.DATA);
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.DATA);
       
       if (!sheet) {
         throw new Error('Data sheet not found');
@@ -279,6 +279,36 @@ const Storage = {
       
     } catch (error) {
       Logger.error('STORAGE', 'Error initializing storage', error);
+      return false;
+    }
+  },
+
+  validateData: function(data) {
+    return data.every(item => {
+      return item.url && 
+             item.name &&
+             typeof item.description === 'string' &&
+             !isNaN(parseFloat(item.price));
+    });
+  },
+
+  saveBatch: async function(data, batchSize = 50) {
+    try {
+      const batches = [];
+      for (let i = 0; i < data.length; i += batchSize) {
+        batches.push(data.slice(i, i + batchSize));
+      }
+      
+      for (const batch of batches) {
+        if (!this.validateData(batch)) {
+          throw new Error('Invalid data in batch');
+        }
+        await this.saveToSheet(batch);
+        Utilities.sleep(1000); // Prevent rate limiting
+      }
+      return true;
+    } catch (error) {
+      Logger.error('STORAGE', 'Batch save error', error);
       return false;
     }
   }

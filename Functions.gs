@@ -7,42 +7,67 @@
  * Start the extraction process
  * @returns {Object} Result with success status
  */
-function startExtraction() {
+function startExtraction(testUrls = null) {
   try {
     // Initialize systems if needed
-    if (!CONFIG.initialize()) {
-      throw new Error('Failed to initialize configuration');
+    const configResult = CONFIG.initialize();
+    if (!configResult.success) {
+      throw new Error('Failed to initialize configuration: ' + configResult.error);
     }
     
-    // Get URLs from the sheet
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 3) {
-      throw new Error('No URLs found in sheet');
+    let urls = testUrls;
+    
+    // If no test URLs provided, get from sheet
+    if (!urls) {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.DATA);
+      if (!sheet) {
+        throw new Error('Data sheet not found');
+      }
+      
+      const lastRow = sheet.getLastRow();
+      if (lastRow < 2) {
+        throw new Error('No URLs found in sheet');
+      }
+      
+      urls = sheet.getRange(2, 1, lastRow - 1, 1).getValues()
+        .map(row => row[0])
+        .filter(url => url && url.trim());
     }
-    
-    // Get URLs from column A (first column)
-    const urls = sheet.getRange(2, 1, lastRow - 1, 2).getValues()
-      .map(row => row[1])
-      .filter(url => url && url.trim()); // Filter out empty URLs
-    
-    if (urls.length === 1) {
-      throw new Error('No valid URLs found');
+
+    // Validate URLs with proper protocol
+    urls = urls.map(url => {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return 'https://' + url;
+      }
+      return url;
+    }).filter(url => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        Logger.warn('EXTRACT', `Invalid URL format: ${url}`);
+        return false;
+      }
+    });
+
+    if (!urls || urls.length === 0) {
+      throw new Error('No valid URLs found for processing');
     }
-    
+
+    // Log URLs to be processed
+    Logger.info('EXTRACT', 'Processing URLs:', urls);
+
     // Initialize Control system
     Control.initialize();
-    
-    // Add URLs to processing queue
     Control.addToQueue(urls);
     
     // Start processing in background
     startBackgroundProcess('processQueue');
     
-    Logger.info('EXTRACT', `Started extraction for ${urls.length} URLs`);
-    
     return {
       success: true,
+      urlCount: urls.length,
+      urls: urls,
       message: `Started extraction for ${urls.length} URLs`
     };
     
@@ -100,9 +125,9 @@ function startProcessing() {
  */
 function processQueue() {
   try {
-    // Start processing
-    Control.startProcessing();
-    
+    Logger.info('QUEUE', 'Starting queue processing');
+    const status = Control.startProcessing();
+    Logger.info('QUEUE', 'Queue processing status:', status);
   } catch (error) {
     Logger.error('QUEUE', 'Queue processing error', error);
     throw error;

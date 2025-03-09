@@ -156,6 +156,76 @@ function testApiConfigurations() {
 }
 
 /**
+ * Test extraction and web app buttons
+ */
+function testExtractionButtons() {
+  try {
+    // Clean up existing triggers first
+    cleanupTriggers();
+
+    // Test URLs - removed protocol to test validation
+    const testUrls = [
+      'www.moilas.com',
+      'www.linkosuo.fi'
+    ];
+    
+    // Log test start
+    Logger.info('TEST', 'Starting extraction test with URLs:', testUrls);
+    
+    const startResult = startExtraction(testUrls);
+    Logger.info('TEST', 'Start Extraction Result:', startResult);
+    
+    // Wait briefly for processing to start
+    Utilities.sleep(2000);
+    
+    // Test stop extraction
+    const stopResult = Control.stopProcessing();
+    Logger.info('TEST', 'Stop Extraction Result:', stopResult);
+    
+    // Check results in sheet
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.DATA);
+    const lastRow = sheet.getLastRow();
+    const data = lastRow > 1 ? sheet.getRange(2, 1, lastRow - 1, 12).getValues() : [];
+    
+    // Log final status
+    const finalStatus = {
+      startResult: startResult,
+      stopResult: stopResult,
+      triggersCleaned: true,
+      dataInSheet: data.length,
+      urls: startResult.urls || []
+    };
+    
+    Logger.info('TEST', 'Button Test Completed', finalStatus);
+    return finalStatus;
+
+  } catch (error) {
+    Logger.error('TEST', 'Button test failed', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+// Add trigger cleanup function
+function cleanupTriggers() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  Logger.info('TEST', `Cleaned up ${triggers.length} triggers`);
+}
+
+// Add test verification function
+function verifyTestResults(results) {
+  return {
+    startSuccess: results?.startResult?.success === true,
+    stopSuccess: results?.stopResult === true,
+    triggersCleaned: results?.triggersCleaned === true
+  };
+}
+
+/**
  * Run all tests
  */
 function runAllTests() {

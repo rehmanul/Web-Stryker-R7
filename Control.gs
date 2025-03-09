@@ -170,9 +170,21 @@ const Control = {
    * Stop processing
    */
   stopProcessing: function() {
-    this.currentState = this.ProcessState.IDLE;
-    this.queue = [];
-    Logger.info('CONTROL', 'Processing stopped');
+    try {
+      this.currentState = this.ProcessState.IDLE;
+      this.queue = [];
+      Logger.info('CONTROL', 'Processing stopped');
+      return {
+        success: true,
+        message: 'Processing stopped successfully'
+      };
+    } catch (error) {
+      Logger.error('CONTROL', 'Error stopping process', error);
+      return {
+        success: false,
+        message: error.message
+      };
+    }
   },
   
   /**

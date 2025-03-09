@@ -244,49 +244,23 @@ const CONFIG = {
     try {
       Logger.info("CONFIG_INIT", "Starting configuration initialization");
       
-      // Step 1: Load settings
-      const settingsResult = this.loadSettings();
-      if (!settingsResult.success) {
-        throw new Error(`Failed to load settings: ${settingsResult.message}`);
-      }
+      // Load settings
+      this.loadSettings();
       
-      // Step 2: Validate configuration
-      const validationResult = this.validateConfig();
-      if (!validationResult.success) {
-        throw new Error(`Invalid configuration: ${validationResult.details.message}`);
-      }
+      // Load API keys
+      this.loadApiKeys();
       
-      // Step 3: Setup caching
-      const cacheResult = this.setupCaching();
-      if (!cacheResult.success) {
-        Logger.warn("CONFIG_INIT", "Cache setup failed, continuing without caching", cacheResult.error);
-      }
-      
-      // Step 4: Setup monitoring
-      const monitoringResult = this.setupMonitoring();
-      if (!monitoringResult.success) {
-        Logger.warn("CONFIG_INIT", "Monitoring setup failed, continuing without monitoring", monitoringResult.error);
-      }
-
       Logger.info("CONFIG_INIT", "Configuration initialized successfully");
       return {
         success: true,
-        details: {
-          cacheEnabled: cacheResult.success,
-          monitoringEnabled: monitoringResult.success,
-          timestamp: new Date().toISOString()
-        }
-      };
-    } catch (error) {
-      const errorDetails = {
-        message: error.message,
-        stack: error.stack,
         timestamp: new Date().toISOString()
       };
-      Logger.error("CONFIG_INIT", "Failed to initialize configuration", errorDetails);
+      
+    } catch (error) {
+      Logger.error("CONFIG_INIT", "Failed to initialize configuration", error);
       return {
         success: false,
-        details: errorDetails
+        error: error.message
       };
     }
   },

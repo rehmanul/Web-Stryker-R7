@@ -1,228 +1,372 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="dark">
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Center - Web Stryker R7</title>
-  
-  <!-- External Resources -->
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    :root[data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --panel-bg: #262626;
+      --text-color: #e0e0e0;
+      --border-color: #404040;
+      --accent-color: #2196f3;
+      --header-color: #3f51b5;
+    }
+
+    :root[data-theme="light"] {
+      --bg-color: #f5f5f5;
+      --panel-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+      --accent-color: #1976d2;
+      --header-color: #1565c0;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg-color);
+      color: var(--text-color);
     }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 800px;
+      margin: 0 auto;
     }
     
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .panel-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent-color);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
       border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
     }
     
-    ::-webkit-scrollbar-thumb {
-      background: #888;
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .extraction-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .option-pill {
+      background: #f5f5f5;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .option-pill.active {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+    
+    .preview-panel {
+      background: #f8f9fa;
       border-radius: 4px;
+      padding: 16px;
+      min-height: 200px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      font-size: 14px;
     }
     
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-
-    .dark ::-webkit-scrollbar-track {
-      background: #2d3748;
+    .action-button {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
     }
     
-    .dark ::-webkit-scrollbar-thumb {
-      background: #4a5568;
+    .action-button:hover {
+      background: var(--header-color);
     }
     
-    .dark ::-webkit-scrollbar-thumb:hover {
-      background: #718096;
+    .action-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
-
-    /* Animations */
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    
+    .action-button i {
+      font-size: 16px;
     }
-
+    
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .message {
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin-top: 16px;
+      display: none;
+    }
+    
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+    
     @keyframes spin {
-      from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
 
-    .animate-pulse {
-      animation: pulse 2s infinite;
+    .logs-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      margin-top: 16px;
     }
 
-    .animate-spin {
-      animation: spin 1s linear infinite;
+    .config-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
 
-    /* Add utility classes */
-    .btn-primary {
-      @apply px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50;
-    }
-    
-    .btn-secondary {
-      @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50;
-    }
-    
-    .btn-danger {
-      @apply px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50;
+    .status-indicators {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
-    .stat-card {
-      @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4;
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dot.active { background: #4caf50; }
+    .dot.processing { background: #ff9800; }
+    .dot.error { background: #f44336; }
   </style>
 </head>
+<body>
+  <div class="theme-toggle">
+    <i class="fas fa-moon" id="themeIcon"></i>
+  </div>
 
-<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-  <!-- Header -->
-  <header class="bg-white dark:bg-gray-800 shadow-md">
-    <div class="container mx-auto px-4 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <i class="fas fa-database text-blue-600 dark:text-blue-400 text-2xl"></i>
-          <h1 class="text-xl font-semibold">Data Center</h1>
+  <div class="container">
+    <div class="panel">
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+        <img src="logo.png" alt="Logo" style="height: 40px;">
+        <h1 style="margin: 0;">Extractor ~ Reasoning R7</h1>
       </div>
-        <div class="flex items-center space-x-4">
-          <span id="statusIndicator" class="flex items-center">
-            <i class="fas fa-circle text-green-500 mr-2"></i>
-            <span>Ready</span>
-          </span>
-          <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-            <i class="fas fa-moon dark:hidden"></i>
-            <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
-        </button>
-      </div>
-    </div>
+
+      <div class="status-indicators">
+        <div class="status-dot">
+          <span class="dot active"></span>
+          <span>API Connected</span>
         </div>
-  </header>
-
-  <main class="container mx-auto px-4 py-8">
-    <!-- Content Section -->
-    <section class="mb-8">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">Content Section</h2>
-        
-        <div class="mb-4">
-          <div class="container">
-            <div id="contentContainer" class="content">
-              <!-- Content will be inserted here by JavaScript -->
-            </div>
-          </div>
+        <div class="status-dot">
+          <span class="dot processing"></span>
+          <span>Processing</span>
         </div>
       </div>
-    </section>
 
-    <!-- Progress Section -->
-    <section class="mb-8 hidden" id="progressSection">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">Extraction Progress</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div class="stat-card">
-            <div class="text-sm text-gray-600 dark:text-gray-400">Processed</div>
-            <div class="text-2xl font-semibold"><span id="processedCount">0</span>/<span id="totalCount">0</span></div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="text-sm text-gray-600 dark:text-gray-400">Success Rate</div>
-            <div class="text-2xl font-semibold text-green-600 dark:text-green-400" id="successRate">0%</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="text-sm text-gray-600 dark:text-gray-400">Average Time</div>
-            <div class="text-2xl font-semibold" id="avgTime">0ms</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="text-sm text-gray-600 dark:text-gray-400">Estimated Time</div>
-            <div class="text-2xl font-semibold" id="eta">--:--</div>
-          </div>
-        </div>
-
-        <div class="flex justify-end">
-          <button onclick="stopExtraction()" id="stopButton" class="btn-danger">
-            <i class="fas fa-stop mr-2"></i>Stop
+      <div class="config-section">
+        <div class="form-group">
+          <h3>Google Knowledge Graph API</h3>
+          <input type="text" id="apiKey" placeholder="Enter API Key">
+          <button class="action-button" onclick="saveAPIKey()">
+            <i class="fas fa-save"></i> Save
           </button>
         </div>
+
+        <div class="form-group">
+          <h3>Other Settings</h3>
+          <div style="display: grid; gap: 8px;">
+            <label>
+              <input type="checkbox" id="autoProcess"> Auto Process New URLs
+            </label>
+            <label>
+              <input type="checkbox" id="debugMode"> Debug Mode
+            </label>
+          </div>
+        </div>
       </div>
-    </section>
-  </main>
+
+      <div class="actions">
+        <button id="extractBtn" class="action-button">
+          <i class="fas fa-play"></i> Start Extraction
+        </button>
+        <button id="previewBtn" class="action-button">
+          <i class="fas fa-eye"></i> View Results
+        </button>
+      </div>
+
+      <div id="message" class="message"></div>
+
+      <div class="logs-panel" id="logs">
+        <!-- Logs will be inserted here -->
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Theme toggle functionality
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', 
-        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-      );
+    // Theme toggling
+    const themeToggle = document.querySelector('.theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      document.getElementById('themeIcon').className = 
+        newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    });
+
+    // Logging function
+    function log(message, type = 'info') {
+      const logs = document.getElementById('logs');
+      const entry = document.createElement('div');
+      entry.innerHTML = `<span style="color: ${type === 'error' ? '#f44336' : '#4caf50'}">
+        [${new Date().toLocaleTimeString()}] ${message}</span>`;
+      logs.appendChild(entry);
+      logs.scrollTop = logs.scrollHeight;
     }
 
-    // Initialize theme
-    if (localStorage.theme === 'dark' || 
-        (!('theme' in localStorage) && 
-         window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      // Extract button
+      document.getElementById('extractBtn').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="loader"></span> Processing...';
+        
+        log('Starting extraction process...');
+        
+        google.script.run
+          .withSuccessHandler(function(result) {
+            document.getElementById('extractBtn').disabled = false;
+            document.getElementById('extractBtn').innerHTML = 
+              '<i class="fas fa-play"></i> Start Extraction';
+            
+            if (result.success) {
+              log('Extraction completed successfully');
+              showMessage('Process completed!', 'success');
+            } else {
+              log('Extraction failed: ' + result.message, 'error');
+              showMessage(result.message || 'Process failed', 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            log('Error occurred: ' + error.message, 'error');
+            document.getElementById('extractBtn').disabled = false;
+            document.getElementById('extractBtn').innerHTML = 
+              '<i class="fas fa-play"></i> Start Extraction';
+            showMessage('Error: ' + error.message, 'error');
+          })
+          .startExtraction();
+      });
 
-    // Content rendering function
-    function renderContent(items) {
-      const contentContainer = document.getElementById('contentContainer');
-      const content = items.map(item => `
-        <div class="item p-4 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
-          <h3 class="text-lg font-semibold mb-2">${item.title}</h3>
-          <p class="text-gray-600 dark:text-gray-400">${item.description}</p>
-        </div>
-      `).join('');
+      // Preview button
+      document.getElementById('previewBtn').addEventListener('click', function() {
+        google.script.run
+          .withSuccessHandler(function(url) {
+            if (url) {
+              window.open(url, '_blank');
+            } else {
+              showMessage('Unable to open preview', 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            showMessage('Error: ' + error.message, 'error');
+          })
+          .openDataPreview();
+      });
+    });
+    
+    function showMessage(text, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + type;
+      messageEl.style.display = 'block';
       
-      contentContainer.innerHTML = content;
-    }
-
-    // Example data
-    const items = [
-      { title: 'Item 1', description: 'Description 1' },
-      { title: 'Item 2', description: 'Description 2' }
-    ];
-
-    // Initialize content
-    renderContent(items);
-
-    // Update progress tracking
-    function updateProgress(stats) {
-      const progressBar = document.getElementById('progressBar');
-      const processedCount = document.getElementById('processedCount');
-      const successRate = document.getElementById('successRate');
-      const avgTime = document.getElementById('avgTime');
-      const eta = document.getElementById('eta');
-
-      const progress = (stats.processed / stats.total) * 100;
-      progressBar.style.width = `${progress}%`;
-      processedCount.textContent = stats.processed;
-      successRate.textContent = `${Math.round((stats.successful / stats.processed) * 100)}%`;
-      avgTime.textContent = `${Math.round(stats.averageTime)}ms`;
-      
-      const remaining = stats.total - stats.processed;
-      const etaSeconds = remaining * (stats.averageTime / 1000);
-      eta.textContent = formatTime(etaSeconds);
-    }
-
-    function formatTime(seconds) {
-      if (seconds < 60) return `${Math.round(seconds)}s`;
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = Math.round(seconds % 60);
-      return `${minutes}m ${remainingSeconds}s`;
+      setTimeout(function() {
+        messageEl.style.display = 'none';
+      }, 5000);
     }
   </script>
 </body>
