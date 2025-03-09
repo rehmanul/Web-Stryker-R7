@@ -82,6 +82,13 @@ const Control = {
       Logger.warn('CONTROL', 'Processing already running');
       return;
     }
+
+    const timeout = setTimeout(() => {
+      if (this.currentState === this.ProcessState.RUNNING) {
+        this.stopProcessing();
+        Logger.error('CONTROL', 'Processing timeout', new Error('Operation timed out'));
+      }
+    }, CONFIG.PROCESSING.TIMEOUT);
     
     if (this.queue.length === 0) {
       Logger.warn('CONTROL', 'No URLs in queue');
@@ -134,6 +141,8 @@ const Control = {
       this.currentState = this.ProcessState.ERROR;
       Logger.error('CONTROL', 'Processing error', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   },
   

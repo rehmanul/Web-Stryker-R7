@@ -329,6 +329,28 @@ const DataProcessor = {
     if (data.price !== undefined && (isNaN(data.price) || data.price < 0)) {
       throw new Error('Invalid price value');
     }
+  },
+
+  validateInput: function(data) {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid input data format');
+    }
+
+    const required = ['url', 'content', 'timestamp'];
+    const missing = required.filter(field => !data[field]);
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`);
+    }
+
+    // URL validation
+    try {
+      new URL(data.url);
+    } catch {
+      throw new Error('Invalid URL format');
+    }
+
+    return true;
   }
 };
 

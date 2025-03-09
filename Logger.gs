@@ -86,7 +86,34 @@ const Logger = {
    * @param {Error|String} error - Error object or message
    */
   error: function(category, message, error) {
-    this.log('ERROR', category, message, null, error);
+    const errorDetails = {
+      message: error?.message || error,
+      stack: error?.stack,
+      timestamp: new Date().toISOString(),
+      category: category
+    };
+
+    this.log('ERROR', category, message, null, errorDetails);
+    
+    // Trigger alerts if error rate exceeds threshold
+    if (CONFIG.MONITORING.ENABLED) {
+      this.checkErrorThreshold();
+    }
+  },
+
+  // Monitor error rates
+  checkErrorThreshold: function() {
+    const recentErrors = this.logBuffer.filter(
+      log => log.level === 'ERROR' && 
+      (new Date() - new Date(log.timestamp)) < 300000 // Last 5 minutes
+    ).length;
+
+    if (recentErrors >= 5) {
+      this.log('CRITICAL', 'MONITORING', 'High error rate detected', {
+        errorCount: recentErrors,
+        timeWindow: '5 minutes'
+      });
+    }
   },
   
   /**
