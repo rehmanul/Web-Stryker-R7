@@ -637,10 +637,10 @@
           <i class="fas fa-list"></i>
           Logs
         </button>
-        <button class="theme-toggle" onclick="toggleTheme()">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
           <i class="fas fa-moon"></i>
         </button>
-      </div>
+      </div> 
     </div>
   </div>
 
@@ -997,10 +997,10 @@
             .getRecentLogs(50);
         } else {
   // Local test
-  renderLogs([
+          renderLogs([
     {
       timestamp: new Date().toISOString(),
-      level: 'INFO',
+      level: 'INFO', 
       category: 'TEST',
       message: 'This is a sample log entry for testing',
       data: null
@@ -1020,11 +1020,64 @@
       data: '{"errorCode": 500, "details": "Internal server error"}'
     }
   ]);
-}
+        }
+      } catch (e) {
+        displayError(`Show logs error: ${e.message}`);
+      }
+    }
+    
+
+function closeLogsUI() {
+  document.getElementById('logsModal').style.display = 'none';
 }
 
-// Close logs UI
-function closeLogsUI() {
+// Toggle log viewer
+function toggleLogs() {
+  document.getElementById('logViewer').style.display = document.getElementById('logViewer').style.display === 'none' ? 'flex' : 'none';
+}
+
+// Render logs
+function renderLogs(logs) {
+  const container = document.getElementById('logsContainer');
+  
+  if (!logs || !Array.isArray(logs) || logs.length === 0) {
+    container.innerHTML = '<p>No logs found.</p>';
+    return;
+  }
+  
+  let html = '<div style="margin-bottom: 20px;">';
+  html += `<strong>${logs.length} log entries</strong>`;
+  html += '</div>';
+  html += '<div style="border-radius: 4px; border: 1px solid var(--border-color); overflow: hidden;">';
+  
+  logs.forEach((log, index) => {
+    // Determine background color based on log level
+    let bgColor = 'transparent';
+    let textColor = 'var(--text-primary)';
+    
+    switch (log.level) {
+      case 'ERROR':
+        bgColor = 'rgba(220, 53, 69, 0.1)';
+        break;
+      case 'WARN':
+      case 'WARNING':
+        bgColor = 'rgba(255, 193, 7, 0.1)';
+        break;
+      case 'INFO':
+        bgColor = 'rgba(13, 110, 253, 0.05)';
+        break;
+    }
+    
+    const date = new Date(log.timestamp);
+    const formattedTime = date.toLocaleTimeString() + ' ' + date.toLocaleDateString();
+    
+    html += `
+      <div style="padding: 10px; background-color: ${bgColor}; color: ${textColor}; border-bottom: 1px solid var(--border-color);">
+        <div style="font-weight: 500; margin-bottom: 5px; display: flex; justify-content: space-between;">
+          <span>[${log.level}] [${log.category}]</span>
+          <span style="color: var(--text-secondary); font-size: 0.9em;">${formattedTime}</span>
+        </div>
+        <div style="margin-bottom: 5px;"> closeLogsUI() {
   document.getElementById('logsModal').style.display = 'none';
 }
 
@@ -1070,15 +1123,8 @@ function renderLogs(logs) {
           <span style="color: var(--text-secondary); font-size: 0.9em;">${formattedTime}</span>
         </div>
         <div style="margin-bottom: 5px;">${log.message}</div>
-        ${log.data ? `<div style="font-family: monospace; font-size: 0.9em; background-color: rgba(0,0,0,0.05); padding: 5px; border-radius: 3px; overflow-x: auto;">${log.data}</div>` : ''}
+        ${log.data ? `<div style="font-family: monospace; font-size: 0.9em; background-color: rgba(0,0,0,0.05); padding: 5px; border-radius: 3px; overflow-x: auto;">${JSON.stringify(log.data, null, 2)}</div>` : ''}
       </div>
-    `;
-  });
-  
-  html += '</div>';
-  container.innerHTML = html;
-}
-
 // Helper function for development/testing
 function simulateServerFunction(functionName, delay = 1000) {
   return new Promise((resolve) => {
@@ -1089,6 +1135,33 @@ function simulateServerFunction(functionName, delay = 1000) {
   });
 }
 
+// Update logs
+function updateLogs(message, level = 'info') {
+  const logContent = document.getElementById('logContent');
+  const logEntry = document.createElement('div');
+  logEntry.className = `log-entry ${level}`;
+  logEntry.textContent = `[${level.toUpperCase()}] ${message}`;
+  logContent.appendChild(logEntry);
+  logContent.scrollTop = logContent.scrollHeight;
+  
+  // Add to logs modal
+  const logsContainer = document.getElementById('logsContainer');
+  const log = {
+    timestamp: new Date().toISOString(),
+    level: level.toUpperCase(),
+    category: 'SYSTEM',
+    message: message,
+    data: null
+  };
+  
+  if (logsContainer.children.length > 0 && logsContainer.children[0].tagName === 'P') {
+    logsContainer.innerHTML = '';
+  }
+  
+  const logEntryModal = document.createElement('p');
+  logEntryModal.textContent = `[${log.level}] ${log.message} (${formatDate(log.timestamp)})`;
+  logsContainer.appendChild(logEntryModal);
+}
 // Helper function to format date
 function formatDate(date) {
   if (!(date instanceof Date)) {
@@ -1108,6 +1181,13 @@ function handleServerEvent(event) {
       updateLogs(`Complete: ${event.data.message}`, 'success');
       break;
   }
+}
+
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
 }
   </script>
 </body>

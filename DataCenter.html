@@ -3,6 +3,7 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
@@ -222,6 +223,10 @@
     }
 
     .dot.active { background: #4caf50; }
+    .dot.inactive {
+      background: #ccc;
+      opacity: 0.5;
+    }
     .dot.processing { background: #ff9800; }
     .dot.error { background: #f44336; }
   </style>
@@ -240,11 +245,11 @@
 
       <div class="status-indicators">
         <div class="status-dot">
-          <span class="dot active"></span>
-          <span>API Connected</span>
+          <span id="apiStatus" class="dot inactive"></span>
+          <span id="apiStatusText">API Not Connected</span>
         </div>
         <div class="status-dot">
-          <span class="dot processing"></span>
+          <span id="processStatus" class="dot inactive"></span>
           <span>Processing</span>
         </div>
       </div>
@@ -252,6 +257,7 @@
       <div class="config-section">
         <div class="form-group">
           <h3>Google Knowledge Graph API</h3>
+          <label for="apiKey">API Key:</label>
           <input type="text" id="apiKey" placeholder="Enter API Key">
           <button class="action-button" onclick="saveAPIKey()">
             <i class="fas fa-save"></i> Save
@@ -259,6 +265,7 @@
         </div>
 
         <div class="form-group">
+        
           <h3>Other Settings</h3>
           <div style="display: grid; gap: 8px;">
             <label>
@@ -309,8 +316,53 @@
       logs.scrollTop = logs.scrollHeight;
     }
 
+    function updateStatus(statusType, status) {
+      const dot = document.getElementById(statusType + 'Status');
+      const text = document.getElementById(statusType + 'StatusText');
+
+      if (status === 'active') {
+        dot.className = 'dot active';
+        if (statusType === 'api') {
+          text.textContent = 'API Connected';
+        }
+      } else if (status === 'processing') {
+        dot.className = 'dot processing';
+        if (statusType === 'process') {
+          text.textContent = 'Processing';
+        }
+      } else if (status === 'error') {
+        dot.className = 'dot error';
+        if (statusType === 'api') {
+          text.textContent = 'API Error';
+        }
+      } else {
+        dot.className = 'dot inactive';
+        text.textContent = 'Not Connected';
+      }
+    }
+
+    function saveAPIKey() {
+      const apiKey = document.getElementById('apiKey').value;
+      log('Saving API Key...');
+      google.script.run
+        .withSuccessHandler(function(result) {
+          log('API Key saved successfully.');
+          showMessage('API Key saved!', 'success');
+          updateStatus('api', 'active');
+        })
+        .withFailureHandler(function(error) {
+          log('Error saving API Key: ' + error.message, 'error');
+          showMessage('Error saving API Key: ' + error.message, 'error');
+          updateStatus('api', 'error');
+        })
+        .saveAPIKey(apiKey);
+    }
     document.addEventListener('DOMContentLoaded', function() {
+      updateStatus('api', 'inactive');
+      updateStatus('process', 'inactive');
+
       // Extract button
+      
       document.getElementById('extractBtn').addEventListener('click', function() {
         this.disabled = true;
         this.innerHTML = '<span class="loader"></span> Processing...';
@@ -318,6 +370,7 @@
         log('Starting extraction process...');
         
         google.script.run
+          .withStatusHandler(status => updateStatus('process', status))
           .withSuccessHandler(function(result) {
             document.getElementById('extractBtn').disabled = false;
             document.getElementById('extractBtn').innerHTML = 
@@ -340,6 +393,7 @@
           })
           .startExtraction();
       });
+      
 
       // Preview button
       document.getElementById('previewBtn').addEventListener('click', function() {
